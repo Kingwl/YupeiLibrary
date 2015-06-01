@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.22823.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YupeiLibrary", "YupeiLibrary\YupeiLibrary.vcxproj", "{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simplify", "Simplify\Simplify.vcxproj", "{4447D0FC-E778-44D7-AC5F-C3BF8480A03C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0CBCF2B6-C421-4C8F-99A7-2137712CEC93}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowTest", "WindowTest\WindowTest.vcxproj", "{63A7BD14-7455-4604-80A0-6BB809C4ABF4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC} = {7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnimationBasis", "AnimationBasis\AnimationBasis.vcxproj", "{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC} = {7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}.Debug|Win32.Build.0 = Debug|Win32
+		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}.Release|Win32.ActiveCfg = Release|Win32
+		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}.Release|Win32.Build.0 = Release|Win32
+		{4447D0FC-E778-44D7-AC5F-C3BF8480A03C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4447D0FC-E778-44D7-AC5F-C3BF8480A03C}.Debug|Win32.Build.0 = Debug|Win32
+		{4447D0FC-E778-44D7-AC5F-C3BF8480A03C}.Release|Win32.ActiveCfg = Release|Win32
+		{4447D0FC-E778-44D7-AC5F-C3BF8480A03C}.Release|Win32.Build.0 = Release|Win32
+		{63A7BD14-7455-4604-80A0-6BB809C4ABF4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{63A7BD14-7455-4604-80A0-6BB809C4ABF4}.Debug|Win32.Build.0 = Debug|Win32
+		{63A7BD14-7455-4604-80A0-6BB809C4ABF4}.Release|Win32.ActiveCfg = Release|Win32
+		{63A7BD14-7455-4604-80A0-6BB809C4ABF4}.Release|Win32.Build.0 = Release|Win32
+		{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9}.Debug|Win32.Build.0 = Debug|Win32
+		{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9}.Release|Win32.ActiveCfg = Release|Win32
+		{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{63A7BD14-7455-4604-80A0-6BB809C4ABF4} = {0CBCF2B6-C421-4C8F-99A7-2137712CEC93}
+		{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9} = {0CBCF2B6-C421-4C8F-99A7-2137712CEC93}
+	EndGlobalSection
+EndGlobal
