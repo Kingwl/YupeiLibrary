@@ -29,6 +29,17 @@ namespace Yupei
 	using true_type = bool_constant<true>;
 	using false_type = bool_constant<false>;
 
+	//Pre-C++ 17 Compiler required
+
+	template<typename... Args>
+	struct make_void
+	{
+		using type = void;
+	};
+
+	template<typename... Args>
+	using void_t = typename make_void<Args...>::type;
+
 	template<bool TestVal,
 		typename Type = void>
 	struct enable_if
@@ -135,6 +146,42 @@ namespace Yupei
 
 	template<typename T>
 	using remove_reference_t = typename remove_reference<T>::type;
+
+	template<typename Type>
+	struct add_const
+	{
+		using type = const Type;
+	};
+
+	template<typename Type>
+	struct add_volatile
+	{
+		using type = volatile Type;
+	};
+
+	template<typename Type>
+	struct add_cv
+	{
+		using type = const volatile Type;
+	};
+
+	template<typename Type>
+	struct add_rvalue_reference
+	{
+		using type = Type&&;
+	};
+
+	template<typename Type>
+	using add_rvalue_reference_t = typename add_rvalue_reference<Type>::type;
+
+	template<typename Type>
+	struct add_lvalue_reference
+	{
+		using type = Type&;
+	};
+
+	template<typename Type>
+	using add_lvalue_reference_t = typename add_lvalue_reference<Type>::type;
 
 	namespace Extension
 	{

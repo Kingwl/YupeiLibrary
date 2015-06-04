@@ -103,6 +103,9 @@
     <ClInclude Include="Stl\binary_search_tree.h">
       <Filter>Stl</Filter>
     </ClInclude>
+    <ClInclude Include="Stl\utility_internal.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gui\Application.cpp">

@@ -95,6 +95,7 @@
     <ClInclude Include="Stl\tuple.h" />
     <ClInclude Include="Stl\type_traits.h" />
     <ClInclude Include="Stl\utility.h" />
+    <ClInclude Include="Stl\utility_internal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gui\Application.cpp" />

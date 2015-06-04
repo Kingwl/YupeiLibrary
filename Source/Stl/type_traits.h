@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "traits_internal.h"
+#include "utility_internal.h"
 
 namespace Yupei
 {
@@ -159,42 +160,6 @@ namespace Yupei
 	{
 
 	};
-
-	template<typename Type>
-	struct add_const
-	{
-		using type = const Type;
-	};
-
-	template<typename Type>
-	struct add_volatile
-	{
-		using type = volatile Type;
-	};
-
-	template<typename Type>
-	struct add_cv
-	{
-		using type = const volatile Type;
-	};
-
-	template<typename Type>
-	struct add_rvalue_reference
-	{
-		using type = Type&&;
-	};
-
-	template<typename Type>
-	using add_rvalue_reference_t = typename add_rvalue_reference<Type>::type;
-
-	template<typename Type>
-	struct add_lvalue_reference
-	{
-		using type = Type&;
-	};
-
-	template<typename Type>
-	using add_lvalue_reference_t = typename add_lvalue_reference<Type>::type;
 
 	template<typename Type>
 	struct remove_extent
@@ -542,4 +507,255 @@ namespace Yupei
 	// };
 	// —end example ]
 
+	template<typename Type>
+	using is_pod = bool_constant<
+		__is_pod(Type)
+	>;
+
+	// An aggregate is an array or a class (Clause 9) with no user-provided constructors (12.1), no private or
+	// protected non-static data members (Clause 11), no base classes (Clause 10), and no virtual functions (10.3)
+	// A type is a literal type if it is:
+	// — void; or
+	// — a scalar type; or
+	// — a reference type; or
+	// — an array of literal type; or
+	// — a class type (Clause 9) that has all of the following properties:
+	// — it has a trivial destructor,
+	// — it is an aggregate type (8.5.1) or has at least one constexpr constructor or constructor template
+	// that is not a copy or move constructor, and
+	// — all of its non-static data members and base classes are of non-volatile literal types.
+
+	template<typename Type>
+	using is_literal_type = bool_constant<
+		__is_literal_type(Type)
+	>;
+
+	// T is a class type, but not a
+	// union type, with no
+	// non-static data members
+	// other than bit-fields of
+	// length 0, no virtual
+	// member functions, no
+	// virtual base classes, and
+	// no base class B for which
+	// is_empty<B>::value is
+	// false.
+
+	template<typename Type>
+	using is_empty = bool_constant<
+		__is_empty(Type)
+	>;
+
+	// Virtual functions support dynamic binding and object-oriented programming. A class that declares or
+	// inherits a virtual function is called a polymorphic class.
+
+	template<typename Type>
+	using is_polymorphic = bool_constant<
+		__is_polymorphic(Type)
+	>;
+
+	// An abstract class is a class that can be used only as a base class of some other class; no objects of an abstract
+	// class can be created except as subobjects of a class derived from it. A class is abstract if it has at least
+	// one pure virtual function.
+
+	template<typename Type>
+	using is_abstract = bool_constant<
+		__is_abstract(Type)
+	>;
+
+	// If is_-
+	// arithmetic<T>::value is
+	// true, the same result as
+	// integral_-
+	// constant<bool, T(-1) <
+	// T(0)>::value; otherwise,
+	// false
+
+	template<typename Type>
+	using is_signed = bool_constant <
+		is_arithmetic<Type>::value &&
+		bool_constant<Type(-1) < Type(0) > ::value>;
+
+	// If is_-
+	// arithmetic<T>::value is
+	// true, the same result as
+	// integral_-
+	// constant<bool, T(0) <
+	// T(-1)>::value;
+	// otherwise, false
+
+	template<typename Type>
+	using is_unsigned = bool_constant <
+		is_arithmetic<Type>::value &&
+		bool_constant<Type(0) < Type(-1) > ::value>;
+
+	template<typename Type,typename... Args>
+	using is_constructible = bool_constant<
+		__is_constructible(Type, Args...)
+	>;
+
+	// is_-
+	// constructible<T>::value
+	// is true.
+
+	template<typename Type>
+	using is_default_constructible = is_constructible<Type>;
+
+	// For a referenceable type T,
+	// the same result as
+	// is_constructible<T,
+	// const T&>::value,
+	// otherwise false.
+
+	template<typename Type>
+	using is_copy_constructible = is_constructible<
+		Type, const Type&>;
+
+	// For a referenceable type T,
+	// the same result as
+	// is_constructible<T,
+	// T&&>::value,
+	// otherwise false.
+
+	template<typename Type>
+	using is_move_constructible = is_constructible<
+		Type, Type&&>;
+
+	// The expression declval<T>() = declval<U>() is well-formed when treated
+	// as an unevaluated operand (Clause 5). Access checking is performed as if
+	// in a context unrelated to T and U. Only the validity of the immediate context of
+	// the assignment expression is considered. [ Note: The compilation of the
+	// expression can result in side effects such as the instantiation of class
+	// template specializations and function template specializations, the
+	// generation of implicitly-defined functions, and so on. Such
+	// side effects are not in the “immediate context” and can result in the program
+	// being ill-formed. —end note ]
+
+	template<typename T,typename U,typename = void>
+	struct IsAssignableHelper : false_type
+	{
+
+	};
+
+	template<typename T, typename U>
+	struct IsAssignableHelper<T,U,void_t<decltype(declval<T>() = declval<U>())>> : true_type
+	{
+
+	};
+
+	template<typename T,typename U>
+	struct is_assignable : IsAssignableHelper<T, U>
+	{
+
+	};
+
+	template<typename Type>
+	using is_copy_assignable = is_assignable<
+		Type&,
+		const Type&
+	>;
+
+	template<typename Type>
+	using is_move_assignable = is_assignable<
+		Type&,
+		Type&&
+	>;
+
+	template<typename Type>
+	using is_destructible = bool_constant<
+		__is_destructible(Type)
+	>;
+
+	template<typename Type,typename... Args>
+	using is_trivially_constructible = bool_constant<
+		__is_trivially_constructible(Type,Args...)
+	>;
+
+	template<typename Type>
+	using is_trivially_default_constructible = is_trivially_constructible<
+		Type
+	>;
+
+	template<typename Type>
+	using is_trivially_copy_constructible = is_trivially_constructible<
+		Type,
+		const Type&
+	>;
+
+	template<typename Type>
+	using is_trivially_move_constructible = is_trivially_constructible<
+		Type,
+		Type&&
+		>;
+
+	template<typename T,typename U>
+	using is_trivially_assignable = bool_constant<
+		__is_trivially_assignable(T, U)
+	>;
+
+	template<typename Type>
+	using is_trivially_copy_assignable = is_trivially_assignable<
+		Type&, 
+		const Type&
+	>;
+
+	template<typename Type>
+	using is_trivially_move_assignable = is_trivially_assignable<
+		Type&,
+		Type&&
+	>;
+
+	template<typename Type>
+	using is_trivially_destructible = bool_constant<
+		__has_trivial_destructor(Type)
+	>;
+
+	template<typename Type,typename... Args>
+	using is_nothrow_constructible = bool_constant<
+		__is_nothrow_constructible(Type, Args...)
+	>;
+
+	template<typename Type>
+	using is_nothrow_default_constructible = is_nothrow_constructible<
+		Type
+	>;
+
+	template<typename Type>
+	using is_nothrow_copy_constructible = is_nothrow_constructible<
+		Type,
+		const Type&
+	>;
+
+	template<typename Type>
+	using is_nothrow_move_constructible = is_nothrow_constructible<
+		Type,
+		Type&&
+	>;
+
+	template<typename T,typename U>
+	using is_nothrow_assignable = bool_constant<
+		__is_nothrow_assignable(T, U)
+	>;
+
+	template<typename Type>
+	using is_nothrow_copy_assignable = is_nothrow_assignable<
+		Type&,
+		const Type&
+	>;
+
+	template<typename Type>
+	using is_nothrow_move_assignable = is_nothrow_assignable<
+		Type&,
+		Type&&
+	>;
+
+	template<typename Type>
+	using is_nothrow_destructible = bool_constant<
+		__is_nothrow_destructible(Type)
+	>;
+
+	template<typename Type>
+	using has_virtual_destructor = bool_constant<
+		__has_virtual_destructor(Type)
+	>;
 }
