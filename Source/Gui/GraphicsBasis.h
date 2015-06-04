@@ -4,7 +4,7 @@
 #include <d2d1helper.h>
 #include <dwrite.h>
 #include "Common.h"
-#include "Functional.h"
+#include "..\..\Source\Stl\Functional.h"
 
 #pragma comment(lib,"d2d1.lib")
 #pragma comment(lib,"dwrite.lib")

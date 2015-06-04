@@ -3,21 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YupeiLibrary", "YupeiLibrary\YupeiLibrary.vcxproj", "{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YupeiLibrary", "Source\YupeiLibrary.vcxproj", "{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simplify", "Simplify\Simplify.vcxproj", "{4447D0FC-E778-44D7-AC5F-C3BF8480A03C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simplify", "Demo\Simplify\Simplify.vcxproj", "{4447D0FC-E778-44D7-AC5F-C3BF8480A03C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0CBCF2B6-C421-4C8F-99A7-2137712CEC93}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowTest", "WindowTest\WindowTest.vcxproj", "{63A7BD14-7455-4604-80A0-6BB809C4ABF4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowTest", "Demo\WindowTest\WindowTest.vcxproj", "{63A7BD14-7455-4604-80A0-6BB809C4ABF4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC} = {7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnimationBasis", "AnimationBasis\AnimationBasis.vcxproj", "{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnimationBasis", "Demo\AnimationBasis\AnimationBasis.vcxproj", "{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC} = {7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{7BA072DC-A8D2-4BC7-BC9F-D1B10E1A3521}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{C4491D18-0589-4BA2-A549-32F203101899}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,7 +48,9 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{63A7BD14-7455-4604-80A0-6BB809C4ABF4} = {0CBCF2B6-C421-4C8F-99A7-2137712CEC93}
-		{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9} = {0CBCF2B6-C421-4C8F-99A7-2137712CEC93}
+		{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC} = {C4491D18-0589-4BA2-A549-32F203101899}
+		{4447D0FC-E778-44D7-AC5F-C3BF8480A03C} = {7BA072DC-A8D2-4BC7-BC9F-D1B10E1A3521}
+		{63A7BD14-7455-4604-80A0-6BB809C4ABF4} = {7BA072DC-A8D2-4BC7-BC9F-D1B10E1A3521}
+		{5F9B6061-2E1E-4A05-A951-AF34EF6EFAE9} = {7BA072DC-A8D2-4BC7-BC9F-D1B10E1A3521}
 	EndGlobalSection
 EndGlobal

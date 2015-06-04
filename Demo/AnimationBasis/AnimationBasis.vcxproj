@@ -74,7 +74,7 @@
     <ClInclude Include="MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YupeiLibrary\YupeiLibrary.vcxproj">
+    <ProjectReference Include="..\..\Source\YupeiLibrary.vcxproj">
       <Project>{7c7be4f3-e155-4fd0-a1b0-cb8bc94c22bc}</Project>
     </ProjectReference>
   </ItemGroup>

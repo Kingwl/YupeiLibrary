@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Basic.h"
+#include "basic.h"
 
 namespace Yupei
 {
@@ -22,8 +22,12 @@ namespace Yupei
 		}
 	};
 
-	using true_type = integral_constant<bool, true>;
-	using false_type = integral_constant<bool, false>;
+	//C++ 17 bool_constant
+	template<bool B>
+	using bool_constant = integral_constant<bool, B>;
+
+	using true_type = bool_constant<true>;
+	using false_type = bool_constant<false>;
 
 	template<bool TestVal,
 		typename Type = void>
@@ -224,7 +228,7 @@ namespace Yupei
 
 	template<typename Type>
 	struct is_arithmetic :
-		conditional_t<is_integral<Type>::value || is_floating_point<Type>::value, true_type, false_type>
+		bool_constant<is_integral<Type>::value || is_floating_point<Type>::value>
 	{
 
 	};

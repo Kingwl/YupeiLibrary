@@ -1,6 +1,8 @@
-#include "..\YupeiLibrary\Memory.h"
-#include "..\\YupeiLibrary\TypeTraits.h"
+#include "..\..\Source\Stl\memory.h"
+#include "..\..\Source\Stl\type_traits.h"
+
 #include <cstdio>
+
 using namespace Yupei;
 
 struct test
@@ -24,5 +26,6 @@ int main()
 	constexpr auto x = is_fundamental<nullptr_t>::value;
 	constexpr auto x = is_object<decltype(bar)>::value;
 	constexpr auto x = is_pointer<int*>::value;
+	constexpr auto x = is_const<const int*>::value;
 	//IsMemberFunctionHelper<decltype(&test::foo)>::
 }

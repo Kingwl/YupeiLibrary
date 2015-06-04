@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Stl">
+      <UniqueIdentifier>{d14920e4-2aec-45fb-8ee4-d1c777a059b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui">
+      <UniqueIdentifier>{a93bc754-9705-48a4-9fdd-da898399e127}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Headers">
+      <UniqueIdentifier>{8cedf358-3e46-4e9b-ad10-cb7ffd3638f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Sources">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Stl\algorithm.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\basic.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\def_internal.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\functional.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\iterator.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\memory.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\traits_internal.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\tuple.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\type_traits.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\utility.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Animation.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Application.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Brush.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Common.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Control.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\EventArgs.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\EventHandler.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Font.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Graphics.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\GraphicsBasis.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\NativeWindows.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Observers.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Panel.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Shapes.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\SystemHelper.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\UIElement.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\Visual.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gui\WindowBase.h">
+      <Filter>Gui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\binary_search_tree.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Gui\Application.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\Brush.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\Graphics.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\GraphicsBasis.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\NativeWindows.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\Shapes.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\UIElement.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\WindowBase.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\Panel.cpp">
+      <Filter>Gui\Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
+</Project>

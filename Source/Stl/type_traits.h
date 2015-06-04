@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "TypeTraitsBasis.h"
-//#include <type_traits>
+
+#include "traits_internal.h"
 
 namespace Yupei
 {
@@ -155,7 +155,7 @@ namespace Yupei
 	};
 
 	template<typename Type>
-	struct is_empty : integral_constant<bool,__is_empty(Type)>
+	struct is_empty : bool_constant<__is_empty(Type)>
 	{
 
 	};
@@ -328,7 +328,7 @@ namespace Yupei
 	};
 
 	template<typename Type>
-	struct is_pointer<Type*> : integral_constant<bool,
+	struct is_pointer<Type*> : bool_constant<
 		!is_member_function_pointer<Type*>::value&&
 		!is_member_object_pointer<Type*>::value
 	>
@@ -337,13 +337,13 @@ namespace Yupei
 	};
 
 	template<typename Type>
-	using is_enum = integral_constant<bool, __is_enum(Type)>;
+	using is_enum = bool_constant< __is_enum(Type)>;
 
 	template<typename Type>
-	using is_union = integral_constant<bool, __is_union(Type)>;
+	using is_union = bool_constant< __is_union(Type)>;
 
 	template<typename Type>
-	using is_class = integral_constant<bool, __is_class(Type)>;
+	using is_class = bool_constant< __is_class(Type)>;
 
 	template<typename Type>
 	using is_function = typename IsFunctionHelper<Type>::BoolType;
@@ -377,8 +377,7 @@ namespace Yupei
 	// 8 An object type is a (possibly cv-qualified) type that is not a function type, not a reference type, and not a
 	// void type.
 	template<typename Type>
-	using is_object = integral_constant<
-		bool,
+	using is_object = bool_constant<
 		!is_function<Type>::value&&
 		!is_reference<Type>::value&&
 		!is_void<Type>::value
@@ -388,8 +387,7 @@ namespace Yupei
 	// data member or non-static
 	// member function
 	template<typename Type>
-	using is_member_pointer = integral_constant<
-		bool,
+	using is_member_pointer = bool_constant<
 		is_member_function_pointer<Type>::value ||
 		is_member_object_pointer<Type>::value
 	>;
@@ -398,18 +396,16 @@ namespace Yupei
 	//9 Arithmetic types (3.9.1), enumeration types, pointer types, pointer to member types (3.9.2), 
 	//std::nullptr_t, and cv-qualified versions of these types (3.9.3) are collectively called scalar types.
 	template<typename Type>
-	using is_scalar = integral_constant<
-		bool,
+	using is_scalar = bool_constant<
 		is_arithmetic<Type>::value ||
 		is_enum<Type>::value ||
 		is_pointer<Type>::value ||
 		is_member_pointer<Type>::value ||
-		is_null_pointer<Type>
+		is_null_pointer<Type>::value
 	>;
 
 	template<typename Type>
-	using is_compound = integral_constant<
-		bool,
+	using is_compound = bool_constant<
 		!is_fundamental<Type>::value
 	>;
 
@@ -452,5 +448,98 @@ namespace Yupei
 	// template <class T> struct is_nothrow_destructible;
 	// template <class T> struct has_virtual_destructor;
 
+	template<typename Type>
+	struct is_const : false_type
+	{
+
+	};
+
+	template<typename Type>
+	struct is_const<const Type> : true_type
+	{
+
+	};
+
+	template<typename Type>
+	struct is_volatile : false_type
+	{
+
+	};
+
+	template<typename Type>
+	struct is_volatile<volatile Type> : true_type
+	{
+
+	};
+
+
+	// A trivially copyable class is a class that:
+	// — has no non-trivial copy constructors (12.8),
+	// — has no non-trivial move constructors (12.8),
+	// — has no non-trivial copy assignment operators (13.5.3, 12.8),
+	// — has no non-trivial move assignment operators (13.5.3, 12.8), and
+	// — has a trivial destructor (12.4).
+	//Scalar types, trivially copyable class types(Clause 9), arrays of such types, and non - volatile constqualified
+	// versions of these types (3.9.3) are collectively called trivially copyable types.
+	template<typename Type>
+	using is_trivially_copyable = bool_constant<
+		__is_trivially_copyable(Type)
+	>;
+
+
+	// A trivial class is a class that has a default constructor (12.1), has no non-trivial default constructors,
+	// and is trivially copyable.
+	// [ Note: In particular, a trivially copyable or trivial class does not have virtual functions or virtual base
+	// classes.—end note ]
+
+	template<typename Type>
+	using is_trivial = bool_constant<__is_trivial(Type)>;
+
+	// 7 A standard-layout class is a class that:
+	// — has no non-static data members of type non-standard-layout class (or array of such types) or reference,
+	// — has no virtual functions (10.3) and no virtual base classes (10.1),
+	// — has the same access control (Clause 11) for all non-static data members,
+	// — has no non-standard-layout base classes,
+	// — either has no non-static data members in the most derived class and at most one base class with
+	// non-static data members, or has no base classes with non-static data members, and
+	// — has no base classes of the same type as the first non-static data member.110
+	// 8 A standard-layout struct is a standard-layout class defined with the class-key struct or the class-key class.
+	// A standard-layout union is a standard-layout class defined with the class-key union.
+	// 9 [ Note: Standard-layout classes are useful for communicating with code written in other programming languages.
+	// Their layout is specified in 9.2.—end note ]
+	//Scalar types, standard-layout class types (Clause 9), arrays of such types and cv-qualified
+    // versions of these types (3.9.3) are collectively called standard-layout types.
+
+	template<typename Type>
+	using is_standard_layout = bool_constant<
+		__is_standard_layout(Type)
+	>;
+
+	// 10 A POD struct111 is a non-union class that is both a trivial class and a standard-layout class, and has no
+	// non-static data members of type non-POD struct, non-POD union (or array of such types). Similarly, a
+	// POD union is a union that is both a trivial class and a standard-layout class, and has no non-static data
+	// members of type non-POD struct, non-POD union (or array of such types). A POD class is a class that is
+	// either a POD struct or a POD union.
+	// [ Example:
+	// struct N { // neither trivial nor standard-layout
+	//	int i;
+	//	int j;
+	// virtual ~N();
+	// };
+	// struct T { // trivial but not standard-layout
+	//	int i;
+	// private:
+	//	int j;
+	// };
+	// struct SL { // standard-layout but not trivial
+	//	int i;
+	//	int j;
+	//	~SL();
+	// };
+	// struct POD { // both trivial and standard-layout
+	//	int i;
+	//	int j;
+	// };
+	// —end example ]
 
 }
