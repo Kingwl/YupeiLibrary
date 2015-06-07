@@ -5,14 +5,14 @@
 namespace Yupei
 {
 	template<typename T>
-	constexpr T&& forward(remove_reference_t<T>& value)
+	inline constexpr T&& forward(remove_reference_t<T>& value)
 	{
 		//lvalue
 		return static_cast<T&&>(value);
 	}
 
 	template<typename T>
-	constexpr T&& forward(remove_reference_t<T>&& value)
+	inline constexpr T&& forward(remove_reference_t<T>&& value)
 	{
 		//rvalue
 		return static_cast<T&&>(value);

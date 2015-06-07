@@ -85,17 +85,20 @@
     <ClInclude Include="Gui\Visual.h" />
     <ClInclude Include="Gui\WindowBase.h" />
     <ClInclude Include="Stl\algorithm.h" />
+    <ClInclude Include="Stl\algo_internal.h" />
     <ClInclude Include="Stl\basic.h" />
     <ClInclude Include="Stl\binary_search_tree.h" />
     <ClInclude Include="Stl\def_internal.h" />
     <ClInclude Include="Stl\functional.h" />
     <ClInclude Include="Stl\iterator.h" />
     <ClInclude Include="Stl\memory.h" />
+    <ClInclude Include="Stl\traits_constant.h" />
     <ClInclude Include="Stl\traits_internal.h" />
     <ClInclude Include="Stl\tuple.h" />
     <ClInclude Include="Stl\type_traits.h" />
     <ClInclude Include="Stl\utility.h" />
     <ClInclude Include="Stl\utility_internal.h" />
+    <ClInclude Include="Stl\__is_mem_func_obj.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gui\Application.cpp" />

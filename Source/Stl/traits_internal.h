@@ -1,34 +1,11 @@
 #pragma once
 
 #include "basic.h"
+#include "traits_constant.h"
 
 namespace Yupei
 {
-	template<typename T, T V>
-	struct integral_constant
-	{
-		static constexpr T value = V;
-		using value_type = T;
-		using type = integral_constant<T, V>;
-
-		constexpr operator value_type () const noexcept
-		{
-			return value;
-		}
-
-		constexpr value_type operator ()() const noexcept
-		{
-			return value;
-		}
-	};
-
-	//C++ 17 bool_constant
-	template<bool B>
-	using bool_constant = integral_constant<bool, B>;
-
-	using true_type = bool_constant<true>;
-	using false_type = bool_constant<false>;
-
+	
 	//Pre-C++ 17 Compiler required
 
 	template<typename... Args>
@@ -52,6 +29,9 @@ namespace Yupei
 	{
 		using type = Type;
 	};
+
+	template<bool B, typename Type>
+	using enable_if_t = typename enable_if<B, Type>::type;
 
 	template<bool TestVal,
 		typename Type1,
@@ -81,12 +61,16 @@ namespace Yupei
 	};
 
 	template<typename Type>
-	struct is_same<Type,Type> : public true_type
+	struct is_same<Type, Type> : public true_type
 	{
 
 	};
 
-#define REMOVE_TOGETHER(CV) remove_##CV
+#define TOGETHER(A,B) A##B
+
+#define TOGETHERT(A,B,C) A##B##C
+
+#define REMOVE_TOGETHER(CV) TOGETHER(remove_,CV)
 
 #define REMOVE_HELPER(CV)			\
 	template<typename Type>			\
@@ -111,10 +95,14 @@ namespace Yupei
 	struct REMOVE_TOGETHER(CV)<CV Type[Index]>\
 	{								\
 		using type = Type[Index];	\
-	};
+	};\
+	template<typename Type>\
+	using TOGETHERT(remove_,CV,_t) = typename REMOVE_TOGETHER(CV)<Type>::type;
+
 
 	REMOVE_HELPER(const)
 	REMOVE_HELPER(volatile)
+
 
 	template<typename Type>
 	struct remove_cv
@@ -154,16 +142,25 @@ namespace Yupei
 	};
 
 	template<typename Type>
+	using add_const_t = typename add_const<Type>::type;
+
+	template<typename Type>
 	struct add_volatile
 	{
 		using type = volatile Type;
 	};
 
 	template<typename Type>
+	using add_volatile_t = typename add_volatile<Type>::type;
+
+	template<typename Type>
 	struct add_cv
 	{
 		using type = const volatile Type;
 	};
+
+	template<typename Type>
+	using add_cv_t = typename add_cv<Type>::type;
 
 	template<typename Type>
 	struct add_rvalue_reference
@@ -279,5 +276,14 @@ namespace Yupei
 	{
 
 	};
+
+
+
+	template<typename T,
+	typename U>
+	using is_base_of = bool_constant<
+		__is_base_of(T,U)
+	>;
+
 
 };

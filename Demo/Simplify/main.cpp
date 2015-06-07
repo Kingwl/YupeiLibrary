@@ -1,44 +1,81 @@
-#include "..\..\Source\Stl\memory.h"
-#include "..\..\Source\Stl\type_traits.h"
 
-#include <cstdio>
+#include "..\..\Source\Stl\type_traits.h"
+#include <iostream>
+#include <typeinfo>
 
 using namespace Yupei;
 
 struct test
 {
-	int i;
-	int foo(...)const &&;
+	int i = 0;
+	int foo(int) { return 0; }
 	typedef int value_type;
 };
-void bar();
+void bar(int) {}
 
+template<typename Type>
+void uni(Type&& t)
+{
+	//static_assert(is_lvalue_reference<Type>::value || is_rvalue_reference<Type>::value, "hahhha");
+	//printf("%s", typeid(t).name());
+}
+
+struct S {
+	double operator()(char, int&);
+	float operator()(int) { return 1.0; }
+};
 
 int main()
 {
-	typedef Yupei::allocator_traits<test>::pointer pointer;
-	auto x = Yupei::remove_const<const int>::type{};
+	//typedef Yupei::allocator_traits<test>::pointer pointer;
+	//auto x = Yupei::remove_const<const int>::type{};
 	Yupei::is_arithmetic<float>::value; //true
-	pointer p;
+	//pointer p;
 	is_one_of<int, long, char, Yupei::true_type> ::value; //false
 	is_array<int>::value; //false
 	is_member_function_pointer<decltype(&test::foo)>::value; //true
-	is_function<decltype(std::printf)>::value; //true
+	//is_function<decltype(std::printf)>::value; //true
 	is_enum<int>::value; //false
 	is_fundamental<nullptr_t>::value; //true
 	is_object<decltype(bar)>::value; //false
 	is_pointer<int*>::value; //true
 	is_const<const int*>::value; //false
-	is_assignable<std::unique_ptr<int>&, std::unique_ptr<int>&&>::value;
+	//is_assignable<std::unique_ptr<int>&, std::unique_ptr<int>&&>::value;
 	is_const<const volatile int>::value; // true
 	is_const<const int*>::value; // false
 	is_const<const int&>::value;// false
 	is_const<int[3]>::value; // false
 	is_const<const int[3]>::value; // true
 
-	remove_const<const volatile int>::type;// volatile int
-	remove_const<const int* const>::type;// const int*
+	//Yupei::remove_const
+	//Yupei::re
+	std::cout << typeid(remove_const_t<const volatile int>).name();// volatile int
+	Yupei::remove_const<const int* const>::type;// const int*
 	remove_const<const int&>::type; // const int&
 	remove_const<const int[3]>::type; // int[3]
-	//IsMemberFunctionHelper<decltype(&test::foo)>::
+	rank<int[][1][2][3]>::value;
+	extent<const int[][1][2][3], 2>::value;
+	make_signed<unsigned int>::type i;
+	is_signed<make_signed<unsigned long long>::type>::value;
+	sizeof(make_signed<unsigned long long>::type);
+	remove_pointer<int *const>::type;
+	remove_cv_t<int*const>;
+	test t;
+	Internal::IsMemberFunctionHelper<decltype(&test::foo)>::ClassType;
+	//(*(&t)).foo();
+	is_member_function_pointer<decay_t<decltype(&test::foo)>>::value;
+	is_member_object_pointer<decay_t<decltype(&test::foo)>>::value;
+	is_member_object_pointer<decltype(&test::i)>::value;
+	is_member_function_pointer<decltype(&test::i)>::value;
+	Internal::IsMemberObjectPointerHelper<Yupei::decay_t<decltype(&test::i)>>::ClassType;
+	Yupei::result_of_t<S(int)>{};
+	invoke(S(), 1);
+	static_assert(sizeof(std::aligned_storage_t<5>) ==
+		sizeof(Yupei::aligned_storage_t<5>), "error");
+	//constexpr auto m = static_max(2, 3, 4, 5, 6, 7, 9);
+	//Yupei::aligned_union<12, int, char, float, double>::alignment_value; //8
+	//constexpr auto y = sizeof(Yupei::aligned_union_t<12, int, char, float, double>);
+	//static_assert(sizeof(Yupei::aligned_union_t<12, int, char, float, double>)
+	//	== sizeof(std::aligned_union_t<12, int, char, float, double>), "error");
+	return 0;
 }

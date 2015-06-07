@@ -106,6 +106,15 @@
     <ClInclude Include="Stl\utility_internal.h">
       <Filter>Stl</Filter>
     </ClInclude>
+    <ClInclude Include="Stl\__is_mem_func_obj.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\traits_constant.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\algo_internal.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gui\Application.cpp">

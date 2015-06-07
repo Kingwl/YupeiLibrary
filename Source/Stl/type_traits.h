@@ -2,164 +2,11 @@
 
 #include "traits_internal.h"
 #include "utility_internal.h"
+#include "__is_mem_func_obj.h"
+#include "algo_internal.h"
 
 namespace Yupei
 {
-
-//Why ?
-#define ADD_CDECL(FUNC,CV_OPT,REF_OPT)\
-	FUNC(_cdecl,CV_OPT,REF_OPT)
-
-//https://msdn.microsoft.com/en-us/library/vstudio/b0084kay(v=vs.140).aspx
-//for Predefined Macros
-
-
-//_M_CEE
-// Defined for a compilation that uses any form of /clr
-// (/clr:oldSyntax, /clr:safe, for example).
-
-#ifdef _M_CEE
-#define ADD_CLRCALL(FUNC, CV_OPT, REF_OPT) \
-	FUNC(__clrcall, CV_OPT, REF_OPT)
-
-#else /* _M_CEE */
-#define ADD_CLRCALL(FUNC, CV_OPT, REF_OPT)
-#endif /* _M_CEE */
-
-#if defined(_M_IX86) && !defined(_M_CEE)
-#define ADD_FASTCALL(FUNC,CV_OPT,REF_OPT)\
-	FUNC(__fastcall,CV_OPT,REF_OPT)
-#else
-	FUNC(__fastcall, CV_OPT, REF_OPT)
-#endif
-
-#if defined(_M_IX86)
-#define ADD_STDCALL(FUNC,CV_OPT,REF_OPT)\
-	FUNC(__stdcall,CV_OPT,REF_OPT)
-
-#define ADD_THISCALL(FUNC,CV_OPT,REF_OPT)\
-	FUNC(__thiscall,CV_OPT,REF_OPT)
-#else
-#define ADD_STDCALL(FUNC,CV_OPT,REF_OPT)
-#define ADD_THISCALL(FUNC,CV_OPT,REF_OPT)
-#endif
-
-// _M_IX86_FP 
-// Expands to an integer literal value indicating which /arch compiler option was used:
-// •0 if /arch:IA32 was used.
-// •1 if /arch:SSE was used.
-// •2 if /arch:SSE2, /arch:AVX or /arch:AVX2 was used. This value is the default if /arch was not specified. When /arch:AVX is specified, the macro __AVX__ is also defined. When /arch:AVX2 is specified, __AVX__ and __AVX2__ are also defined.
-// •See /arch (x86) for more information.
-
-#if ((defined(_M_IX86) && _M_IX86_FP >= 2) \
-	|| defined(_M_X64)) && !defined(_M_CEE)
-#define ADD_VECTORCALL(FUNC, CV_OPT, REF_OPT) \
-	FUNC(__vectorcall, CV_OPT, REF_OPT)
-
-#else /* defined(_M_IX86) && _M_IX86_FP >= 2 etc. */
-#define ADD_VECTORCALL(FUNC, CV_OPT, REF_OPT)
-#endif /* defined(_M_IX86) && _M_IX86_FP >= 2 etc. */
-
-#define ADD_CONV_TO_MEMBER_FUNC(FUNC, CV_OPT, REF_OPT) \
-	ADD_CDECL(FUNC, CV_OPT, REF_OPT) \
-	ADD_CLRCALL(FUNC, CV_OPT, REF_OPT) \
-	ADD_FASTCALL(FUNC, CV_OPT, REF_OPT) \
-	ADD_STDCALL(FUNC, CV_OPT, REF_OPT) \
-	ADD_THISCALL(FUNC, CV_OPT, REF_OPT) \
-	ADD_VECTORCALL(FUNC, CV_OPT, REF_OPT)
-
-#define FUNCTION_ADAPTER(CALL_OPT,FUNC,REF_OPT)\
-	FUNC(CALL_OPT)
-
-#define ADD_CALL_OPT_TO_NONMEMBER_FUNC(FUNC) \
-	ADD_CDECL(FUNCTION_ADAPTER, FUNC,) \
-	ADD_CLRCALL(FUNCTION_ADAPTER, FUNC,) \
-	ADD_FASTCALL(FUNCTION_ADAPTER, FUNC,) \
-	ADD_STDCALL(FUNCTION_ADAPTER, FUNC,) \
-	ADD_THISCALL(FUNCTION_ADAPTER, FUNC,) \
-	ADD_VECTORCALL(FUNCTION_ADAPTER, FUNC,)
-
-#define ADD_CV_TO_MEMBER_FUNC(FUNC , REF_OPT)\
-	ADD_CONV_TO_MEMBER_FUNC(FUNC, ,REF_OPT)\
-	ADD_CONV_TO_MEMBER_FUNC(FUNC,const ,REF_OPT)\
-	ADD_CONV_TO_MEMBER_FUNC(FUNC,volatile ,REF_OPT)\
-	ADD_CONV_TO_MEMBER_FUNC(FUNC,const volatile ,REF_OPT)\
-
-
-#define ADD_REF_CV_TO_MEMBER_FUNC(FUNC) \
-	ADD_CV_TO_MEMBER_FUNC(FUNC, )\
-	ADD_CV_TO_MEMBER_FUNC(FUNC, &)\
-	ADD_CV_TO_MEMBER_FUNC(FUNC, &&)
-
-#define ADD_CV_TO_CLASS(CLASS,REF_OPT)\
-	CLASS(const,REF_OPT)\
-	CLASS(,REF_OPT)\
-	CLASS(volatile,REF_OPT)\
-	CLASS(const volatile,REF_OPT)
-
-#define ADD_CV_REF_TO_CLASS(CLASS)\
-	ADD_CV_TO_CLASS(CLASS,)\
-	ADD_CV_TO_CLASS(CLASS,&)\
-	ADD_CV_TO_CLASS(CLASS,&&)
-
-	template<typename Type>
-	struct IsMemberFunctionHelper
-	{
-		using BoolType = false_type;
-	};
-
-
-#define IS_MEMBER_FUNCTION_POINTER(CALL_OPT,CV_OPT,REF_OPT)\
-	template<typename R,typename ClassType,typename... Args>\
-	struct IsMemberFunctionHelper<R(CALL_OPT ClassType::*)(Args...)CV_OPT REF_OPT> \
-{\
-	using ClassType = ClassType;\
-	using ReturnType = R;	\
-	using BoolType = true_type;\
-};
-
-	ADD_REF_CV_TO_MEMBER_FUNC(IS_MEMBER_FUNCTION_POINTER)
-
-#define IS_MEMBER_FUNCTION_POINTER_ELLIPSIS(CV_OPT,REF_OPT)\
-	template<typename R,typename ClassType,typename... Args>\
-	struct IsMemberFunctionHelper<R(ClassType::*)(Args..., ...)CV_OPT REF_OPT> \
-{\
-	using ClassType = ClassType;\
-	using ReturnType = R;	\
-	using BoolType = true_type;\
-};
-
-	ADD_CV_REF_TO_CLASS(IS_MEMBER_FUNCTION_POINTER_ELLIPSIS)
-
-	template<typename Type>
-	struct IsFunctionHelper
-	{
-		using BoolType = false_type;
-	};
-
-
-#define IS_FUNCTION_(CALL_OPT)\
-	template<typename R,typename... Args>\
-	struct IsFunctionHelper<R CALL_OPT (Args...)>\
-	{\
-		using ReturnType = R;\
-		using BoolType = true_type;\
-	};
-
-	ADD_CALL_OPT_TO_NONMEMBER_FUNC(IS_FUNCTION_)
-
-	template<typename R, typename... Args>
-	struct IsFunctionHelper<R(Args..., ...)>
-	{
-		using ReturnType = R;
-		using BoolType = true_type;
-	};
-
-	template<typename Type>
-	struct is_empty : bool_constant<__is_empty(Type)>
-	{
-
-	};
 
 	template<typename Type>
 	struct remove_extent
@@ -173,11 +20,14 @@ namespace Yupei
 		using type = Type;
 	};
 
-	template<typename Type,size_t Index>
+	template<typename Type, std::size_t Index>
 	struct remove_extent<Type[Index]>
 	{
 		using type = Type;
 	};
+
+	template<typename Type>
+	using remove_extent_t = typename remove_extent<Type>::type;
 
 	template<typename Type>
 	struct remove_all_extents
@@ -191,11 +41,14 @@ namespace Yupei
 		using type = typename remove_all_extents<Type>::type;
 	};
 
-	template<typename Type,size_t Index>
+	template<typename Type, std::size_t Index>
 	struct remove_all_extents<Type[Index]>
 	{
 		using type = typename remove_all_extents<Type>::type;
 	};
+
+	template<typename Type>
+	using remove_all_extents_t = typename remove_all_extents<Type>::type;
 
 	// 20.10.4.1, primary type categories:
 	/*template <class T> struct is_void;
@@ -237,13 +90,13 @@ namespace Yupei
 
 	};
 
-	template<typename Type,std::size_t N>
+	template<typename Type, std::size_t N>
 	struct is_array<Type[N]> : true_type
 	{
 
 	};
 
-	
+
 	template<typename Type>
 	struct is_lvalue_reference : false_type
 	{
@@ -268,20 +121,7 @@ namespace Yupei
 
 	};
 
-	template<typename Type>
-	struct is_member_object_pointer : false_type
-	{
 
-	};
-
-	template<typename ClassType,typename MemberType>
-	struct is_member_object_pointer<MemberType ClassType::*> : true_type
-	{
-
-	};
-
-	template<typename Type>
-	using is_member_function_pointer = typename IsMemberFunctionHelper<Type>::BoolType;
 
 	/*Includes pointers to
 	functions but not pointers
@@ -311,7 +151,7 @@ namespace Yupei
 	using is_class = bool_constant< __is_class(Type)>;
 
 	template<typename Type>
-	using is_function = typename IsFunctionHelper<Type>::BoolType;
+	using is_function = typename Internal::IsFunctionHelper<Type>::BoolType;
 
 	// 20.10.4.2, composite type categories:
 	// template <class T> struct is_reference;
@@ -324,8 +164,8 @@ namespace Yupei
 
 	template<typename Type>
 	using is_reference = integral_constant<
-		bool, 
-		is_lvalue_reference<Type>::value || 
+		bool,
+		is_lvalue_reference<Type>::value ||
 		is_rvalue_reference<Type>::value
 	>;
 
@@ -473,7 +313,7 @@ namespace Yupei
 	// 9 [ Note: Standard-layout classes are useful for communicating with code written in other programming languages.
 	// Their layout is specified in 9.2.—end note ]
 	//Scalar types, standard-layout class types (Clause 9), arrays of such types and cv-qualified
-    // versions of these types (3.9.3) are collectively called standard-layout types.
+	// versions of these types (3.9.3) are collectively called standard-layout types.
 
 	template<typename Type>
 	using is_standard_layout = bool_constant<
@@ -589,7 +429,7 @@ namespace Yupei
 		is_arithmetic<Type>::value &&
 		bool_constant<Type(0) < Type(-1) > ::value>;
 
-	template<typename Type,typename... Args>
+	template<typename Type, typename... Args>
 	using is_constructible = bool_constant<
 		__is_constructible(Type, Args...)
 	>;
@@ -631,20 +471,23 @@ namespace Yupei
 	// side effects are not in the “immediate context” and can result in the program
 	// being ill-formed. —end note ]
 
-	template<typename T,typename U,typename = void>
-	struct IsAssignableHelper : false_type
+	namespace Internal
 	{
+		template<typename T, typename U, typename = void>
+		struct IsAssignableHelper : false_type
+		{
 
-	};
+		};
+
+		template<typename T, typename U>
+		struct IsAssignableHelper<T, U, void_t<decltype(declval<T>() = declval<U>())>> : true_type
+		{
+
+		};
+	}
 
 	template<typename T, typename U>
-	struct IsAssignableHelper<T,U,void_t<decltype(declval<T>() = declval<U>())>> : true_type
-	{
-
-	};
-
-	template<typename T,typename U>
-	struct is_assignable : IsAssignableHelper<T, U>
+	struct is_assignable : Internal::IsAssignableHelper<T, U>
 	{
 
 	};
@@ -666,9 +509,9 @@ namespace Yupei
 		__is_destructible(Type)
 	>;
 
-	template<typename Type,typename... Args>
+	template<typename Type, typename... Args>
 	using is_trivially_constructible = bool_constant<
-		__is_trivially_constructible(Type,Args...)
+		__is_trivially_constructible(Type, Args...)
 	>;
 
 	template<typename Type>
@@ -686,16 +529,16 @@ namespace Yupei
 	using is_trivially_move_constructible = is_trivially_constructible<
 		Type,
 		Type&&
-		>;
+	>;
 
-	template<typename T,typename U>
+	template<typename T, typename U>
 	using is_trivially_assignable = bool_constant<
 		__is_trivially_assignable(T, U)
 	>;
 
 	template<typename Type>
 	using is_trivially_copy_assignable = is_trivially_assignable<
-		Type&, 
+		Type&,
 		const Type&
 	>;
 
@@ -710,7 +553,7 @@ namespace Yupei
 		__has_trivial_destructor(Type)
 	>;
 
-	template<typename Type,typename... Args>
+	template<typename Type, typename... Args>
 	using is_nothrow_constructible = bool_constant<
 		__is_nothrow_constructible(Type, Args...)
 	>;
@@ -732,7 +575,7 @@ namespace Yupei
 		Type&&
 	>;
 
-	template<typename T,typename U>
+	template<typename T, typename U>
 	using is_nothrow_assignable = bool_constant<
 		__is_nothrow_assignable(T, U)
 	>;
@@ -758,4 +601,577 @@ namespace Yupei
 	using has_virtual_destructor = bool_constant<
 		__has_virtual_destructor(Type)
 	>;
+
+	// 20.10.5, type property queries:
+	//template <class T> struct alignment_of;
+	//template <class T> struct rank;
+	//template <class T, unsigned I = 0> struct extent;
+
+	template<typename Type>
+	using alignment_of = integral_constant<
+		std::size_t,
+		alignof(Type)
+	>;
+
+	template<typename Type>
+	struct rank : integral_constant<
+		std::size_t,
+		0
+	>
+	{
+
+	};
+
+	template<typename Type, size_t N>
+	struct rank<Type[N]> : integral_constant<
+		std::size_t,
+		rank<Type>::value + 1
+	>
+	{
+
+	};
+
+	template<typename Type>
+	struct rank<Type[]> : integral_constant<
+		std::size_t,
+		rank<Type>::value + 1
+	>
+	{
+
+	};
+
+	namespace Internal
+	{
+		template<typename Type,
+			unsigned I,
+			unsigned Now>
+		struct ExtentHelper : integral_constant<
+			std::size_t,
+			0
+		>
+		{
+
+		};
+
+		template<typename Type,
+			unsigned I,
+			unsigned Now>
+		struct ExtentHelper<Type[], I, Now> :
+			ExtentHelper<
+			Type,
+			I,
+			Now + 1>
+		{
+
+		};
+
+		template<typename Type,
+			unsigned I
+		>
+		struct ExtentHelper<Type[], I, I>
+			:integral_constant<
+			std::size_t,
+			0
+			>
+		{
+
+		};
+
+		template<typename Type,
+			unsigned I,
+			unsigned Now,
+			std::size_t N>
+		struct ExtentHelper<Type[N], I, Now>
+			:ExtentHelper<Type, I, Now + 1>
+		{
+
+		};
+
+		template<typename Type,
+			unsigned I,
+			std::size_t N>
+		struct ExtentHelper<Type[N], I, I>
+			:integral_constant<
+			std::size_t,
+			N
+			>
+		{
+
+		};
+	}
+
+	template<typename Type,
+		unsigned I = 0>
+	struct extent : Internal::ExtentHelper<Type, I, 0>
+	{
+
+	};
+
+	// 20.10.6, type relations:
+	//template <class T, class U> struct is_same;
+	//template <class Base, class Derived> struct is_base_of;
+	//template <class From, class To> struct is_convertible;
+
+	//is_same is in traits_internal.h
+
+	
+	template<typename From, typename To>
+	using is_convertible = bool_constant<
+		__is_convertible_to(From, To)
+	>;
+
+	// 20.10.7.1, const-volatile modifications:
+	/*template <class T> struct remove_const;
+	template <class T> struct remove_volatile;
+	template <class T> struct remove_cv;
+	template <class T> struct add_const;
+	template <class T> struct add_volatile;
+	template <class T> struct add_cv;*/
+	//complete
+
+	// 20.10.7.2, reference modifications:
+	//template <class T> struct remove_reference;
+	//template <class T> struct add_lvalue_reference;
+	//template <class T> struct add_rvalue_reference;
+	//complete
+
+	// 20.10.7.3, sign modifications:
+	//template <class T> struct make_signed;
+	//template <class T> struct make_unsigned;
+
+	namespace Internal
+	{
+		template<typename Type>
+		struct SignedHelper
+		{
+			static_assert(
+				is_integral<Type>::value || is_enum<Type>::value
+				&& !is_same<Type, bool>::value,
+				"Hahahahahahahahahaha,non-integral type & bool are disallowed ! hahahahaha");
+			//if..else
+			using signed_type = conditional_t <
+				is_one_of<Type, signed char, unsigned char>::value, //if(Type == signed char || Type == unsigned char)
+				signed char, // then type == signed char
+				conditional_t < //else if
+				is_one_of<Type, signed short, unsigned short>::value,//if(Type == signed short || Type == unsigned short)
+				signed short,  //then type == signed short
+				conditional_t < //else 
+				is_one_of<Type, signed int, unsigned int>::value,//if(Type == signed int || Type == unsigned int)
+				signed int, //then type == signed int
+				conditional_t <
+				is_one_of<Type, signed long, unsigned long>::value,
+				signed long,
+				conditional_t <
+				is_one_of<Type, signed long long, unsigned long long>::value,
+				signed long long,
+				conditional_t < sizeof(Type) == sizeof(signed char),
+				signed char,
+				conditional_t < sizeof(Type) == sizeof(signed short),
+				signed short,
+				conditional_t < sizeof(Type) == sizeof(signed int),
+				signed int,
+				conditional_t<sizeof(Type) == sizeof(signed long),
+				signed long,
+				signed long long
+				>> >> >> >> >;
+			using unsigned_type =
+				conditional_t <
+				is_same<signed_type, signed char>::value,
+				unsigned char,
+				conditional_t <
+				is_same<signed_type, signed short>::value,
+				unsigned short,
+				conditional_t <
+				is_same<signed_type, signed int>::value,
+				unsigned int,
+				conditional_t <
+				is_same<signed_type, signed long>::value,
+				unsigned long,
+				unsigned long long
+				>> >> ;
+		};
+	}
+
+	template<typename Type>
+	struct make_signed
+	{
+		using type = typename Internal::SignedHelper<Type>::signed_type;
+	};
+
+	template<typename Type>
+	using make_signed_t = typename make_signed<Type>::type;
+
+	template<typename Type>
+	struct make_unsigned
+	{
+		using type = typename Internal::SignedHelper<Type>::unsigned_type;
+	};
+
+	template<typename Type>
+	using make_unsigned_t = typename make_unsigned<Type>::type;
+
+	// 20.10.7.5, pointer modifications:
+	//template <class T> struct remove_pointer;
+	//template <class T> struct add_pointer;
+
+	namespace Internal
+	{
+		template<typename Type>
+		struct RemovePointerHelper
+		{
+			using type = Type;
+		};
+
+		template<typename Type>
+		struct RemovePointerHelper<Type*>
+		{
+			using type = Type;
+		};
+	}
+    
+	template<typename Type>
+	using remove_pointer = Internal::RemovePointerHelper<remove_cv_t<Type>>;
+
+	template <typename Type>
+	using remove_pointer_t = typename remove_pointer<Type>::type;
+
+	template<typename Type>
+	struct add_pointer
+	{
+		using type = remove_reference_t<Type>*;
+	};
+
+	template <typename Type>
+	using add_pointer_t = typename add_pointer<Type>::type;
+
+	// 20.10.7.6, other transformations:
+	//template <std::size_t Len,
+	// std::size_t Align = default-alignment> // see 20.10.7.6
+	// struct aligned_storage;
+	// template <std::size_t Len, class... Types> struct aligned_union;
+	// template <class T> struct decay;
+	// template <bool, class T = void> struct enable_if;
+	// template <bool, class T, class F> struct conditional;
+	// template <class... T> struct common_type;
+	// template <class T> struct underlying_type;
+	// template <class> class result_of; // not defined
+	// template <class F, class... ArgTypes> class result_of<F(ArgTypes...)>;
+	// template <std::size_t Len,
+	// std::size_t Align = default-alignment > // see 20.10.7.6
+	// using aligned_storage_t = typename aligned_storage<Len,Align>::type;
+	// template <std::size_t Len, class... Types>
+	// using aligned_union_t = typename aligned_union<Len,Types...>::type;
+	// template <class T>
+	// using decay_t = typename decay<T>::type;
+	// template <bool b, class T = void>
+	// using enable_if_t = typename enable_if<b,T>::type;
+	// template <bool b, class T, class F>
+	// using conditional_t = typename conditional<b,T,F>::type;
+	// template <class... T>
+	// using common_type_t = typename common_type<T...>::type;
+	// template <class T>
+	// using underlying_type_t = typename underlying_type<T>::type;
+	// template <class T>
+	// using result_of_t = typename result_of<T>::type;
+	// template <class...>
+	// using void_t = void;
+
+
+	template <std::size_t Len,
+		std::size_t Align = alignment_of<max_align_t>::value> 
+	struct aligned_storage
+	{
+		struct type 
+		{ 
+			alignas(Align) unsigned char data[Len];
+		};
+	};
+
+	template<std::size_t Len,
+		std::size_t Align = alignment_of<std::max_align_t>::value>
+		using aligned_storage_t = typename aligned_storage<Len, Align>::type;
+
+
+#if  _MSC_FULL_VER > 190022816 //there is still bug with constexpr with RC
+	//no extended constexpr support
+	//static_max: fuck Visual C++ 2015 RC !
+	template<typename Type>
+	inline constexpr auto static_max(Type&& t)
+	{
+		return t;
+	}
+
+	template<typename Type1,
+		typename Type2,
+		typename... Args>
+	inline constexpr auto static_max(Type1&& t1, Type2&& t2, Args&&... args)
+	{
+		return static_max((t1 > t2 ?
+			Yupei::forward<Type1>(t1)
+			:Yupei::forward<Type2>(t2)), 
+			static_max(Yupei::forward<Args>(args))...);
+	}
+	
+	////http://en.cppreference.com/w/cpp/types/aligned_union
+	//template <std::size_t Len, typename... Types>
+	//struct aligned_union
+	//{
+	//	static constexpr std::size_t alignment_value = Yupei::static_max( alignof(Types)... );
+
+	//	struct type
+	//	{
+	//		alignas(alignment_value) char _s[Yupei::static_max( Len, sizeof(Types)... )];
+	//	};
+	//};
+
+	//template <std::size_t Len, typename... Types>
+	//using aligned_union_t = typename aligned_union<Len, Types...>::type;
+#endif
+
+	template<typename Type>
+	struct decay
+	{
+		using temp_type = remove_reference_t<Type>;
+		using type = conditional_t <
+			is_array<temp_type>::value,
+			remove_extent_t<temp_type>,
+			conditional_t <
+			is_function<temp_type>::value,
+			add_pointer_t<temp_type>,
+			remove_cv_t<temp_type>
+			>> ;
+	};
+
+	template<typename Type>
+	using decay_t = typename decay<Type>::type;
+
+	
+	
+	template <typename... Args> 
+	struct common_type;
+
+	template <typename Type> 
+	struct common_type<Type>
+	{
+		using type = Type;
+	};
+
+	//http://stackoverflow.com/questions/21975812/should-stdcommon-type-use-stddecay
+	template<typename Type1,
+		typename Type2>
+	struct common_type<Type1, Type2>
+	{
+		using type = decay_t<
+			decltype(true ? declval<Type1>() : declval<Type2>())
+			>;
+	};
+
+	template<typename Type1,
+		typename Type2,
+		typename... Args>
+	struct common_type<Type1,
+		Type2,
+		Args...>
+	{
+		using type =
+			typename common_type<typename common_type<Type1, Type2>::type,
+			Args...>::type;
+	};
+
+	template<typename Type>
+	using common_type_t = typename common_type<Type>::type;
+
+	template<typename Type>
+	struct underlying_type
+	{
+		typedef __underlying_type(Type) type;
+	};
+
+	template<typename Type>
+	using underlying_type_t = typename underlying_type<Type>::type;
+
+	namespace Internal
+	{
+
+		struct InvokeMemberFunc
+		{
+			template<typename F,
+				typename T1,
+				typename... Args
+			>
+				static decltype(auto) _Call
+				(F f, T1&& t1, Args&&... args)
+				//->decltype((Yupei::forward<T1>(t1).*f)(Yupei::forward<Args>(args)...))
+			{
+				return (Yupei::forward<T1>(t1).*f)(Yupei::forward<Args>(args)...);
+			}
+		};
+
+		struct InvokeMemberFunc2
+		{
+			template<typename F,
+				typename T1,
+				typename... Args
+			>
+				static decltype(auto) _Call
+				(F f, T1&& t1, Args&&... args)
+				//->decltype(((*Yupei::forward<T1>(t1)).*f)(Yupei::forward<Args>(args)...))
+			{
+				return (*Yupei::forward<T1>(t1).*f)(Yupei::forward<Args>(args)...);
+			}
+		};
+
+		struct GetMember
+		{
+			template<typename F,
+				typename T1
+			>
+				static decltype(auto) _Call
+				(F f, T1&& t1)
+				//->decltype((Yupei::forward<T1>(t1)).*f)
+			{
+				return (Yupei::forward<T1>(t1)).*f;
+			}
+		};
+
+		struct GetMember2
+		{
+			template<typename F,
+				typename T1
+			>
+				static decltype(auto) _Call
+				(F f, T1&& t1)
+				//->decltype((*Yupei::forward<T1>(t1)).*f)
+			{
+				return (*Yupei::forward<T1>(t1)).*f;
+			}
+		};
+
+		struct NormalCall
+		{
+			template<typename F,
+				typename... Args
+			>
+				static decltype(auto) _Call(F f, Args&&... args)
+				//->decltype(Yupei::forward<F>(f)(Yupei::forward<Args>(args)...))
+			{
+				return f(Yupei::forward<Args>(args)...);
+			}
+		};
+
+		template<typename DecayType,
+			typename T1,
+			bool IsMemberFunc = is_member_function_pointer<DecayType>::value,
+			bool IsMemberObj = is_member_object_pointer<DecayType>::value
+		>
+		struct Invoker;
+
+		template<typename DecayType,
+			typename T1
+		>
+		struct Invoker<DecayType, T1, true, false> :
+			conditional_t<
+			is_same<typename IsMemberFunctionHelper<DecayType>::ClassType,
+			decay_t<T1 >> ::value ||
+			is_base_of<
+			typename IsMemberFunctionHelper<DecayType>::ClassType,
+			decay_t<T1>
+			>::value,
+			InvokeMemberFunc,
+			InvokeMemberFunc2>
+		{
+
+		};
+
+		template<typename DecayType,
+			typename T1
+		>
+		struct Invoker<DecayType, T1, false, true> :
+			conditional_t<
+			is_same<
+			typename IsMemberObjectPointerHelper<DecayType>::ClassType,
+			decay_t<T1 >> ::value ||
+			is_base_of<
+			typename IsMemberObjectPointerHelper<DecayType>::ClassType,
+			decay_t<T1>
+			>::value,
+			GetMember,
+			GetMember2>
+		{
+
+		};
+		template<typename DecayType,
+			typename T1
+		>
+		struct Invoker<DecayType, T1, false, false> : NormalCall
+		{
+
+		};
+
+		template<typename F,
+			typename...Args>
+		struct Invoker1;
+
+		template<typename F>
+		struct Invoker1<F> :NormalCall
+		{
+
+		};
+
+		template<typename F,
+			typename T1,
+			typename... Args>
+		struct Invoker1<F, T1, Args...> : Invoker<decay_t<F>, T1>
+		{
+
+		};
+	}
+	// 20.9.3, invoke:	
+	//template <class F, class... Args> result_of_t<F && (Args&&...)> invoke(F&& f, Args&&... args);
+
+	template <typename F, typename... Args>
+	inline decltype(auto) invoke(F&& f, Args&&... args)
+	{
+		return Internal::Invoker1<F, Args...>::_Call(Yupei::forward<F>(f), Yupei::forward<Args>(args)...);
+	}
+
+
+
+	 //template <class> class result_of; // not defined
+	// template <class F, class... ArgTypes> class result_of<F(ArgTypes...)>;
+
+	//This is an Expression-SFINAE implement,which is not supported by VS2015 RC...
+	//template<typename Type,typename = void>
+	//struct result_of
+	//{
+	//	// no member type
+	//};
+
+	//template<typename F,
+	//	typename... Args>
+	//struct result_of<F(Args...),
+	//	void_t < decltype(invoke(declval<F>(), declval<Args>()...)) >
+	//>
+	//{
+	//	using type =
+	//		decltype(invoke(declval<F>(), declval<Args>()...));
+	//};
+
+	template<typename Type>
+	struct result_of
+	{
+		// no member type
+	};
+
+	template<typename F,
+		typename... Args>
+	struct result_of<F(Args...)
+	>
+	{
+		using type =
+			decltype(invoke(declval<F>(), declval<Args>()...));
+	};
+
+	template <typename Type>
+	using result_of_t = typename result_of<Type>::type;
 }
