@@ -32,4 +32,6 @@ namespace Yupei
 
 	template<typename Type>
 	add_rvalue_reference_t<Type> declval() noexcept;
+
+	
 }

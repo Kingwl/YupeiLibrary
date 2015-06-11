@@ -555,7 +555,8 @@ namespace Yupei
 
 	template<typename Type, typename... Args>
 	using is_nothrow_constructible = bool_constant<
-		__is_nothrow_constructible(Type, Args...)
+		//__is_nothrow_constructible(Type, Args...)
+		true
 	>;
 
 	template<typename Type>
@@ -1136,7 +1137,6 @@ namespace Yupei
 	}
 
 
-
 	 //template <class> class result_of; // not defined
 	// template <class F, class... ArgTypes> class result_of<F(ArgTypes...)>;
 
@@ -1174,4 +1174,6 @@ namespace Yupei
 
 	template <typename Type>
 	using result_of_t = typename result_of<Type>::type;
+
+	
 }

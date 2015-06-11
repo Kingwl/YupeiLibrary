@@ -30,7 +30,7 @@ namespace Yupei
 		using type = Type;
 	};
 
-	template<bool B, typename Type>
+	template<bool B, typename Type = void>
 	using enable_if_t = typename enable_if<B, Type>::type;
 
 	template<bool TestVal,

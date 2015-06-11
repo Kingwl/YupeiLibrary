@@ -115,6 +115,12 @@
     <ClInclude Include="Stl\algo_internal.h">
       <Filter>Stl</Filter>
     </ClInclude>
+    <ClInclude Include="Stl\__swap.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\__allocator.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gui\Application.cpp">

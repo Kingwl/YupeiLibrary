@@ -10,26 +10,31 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}</ProjectGuid>
-    <RootNamespace>YupeiLibrary</RootNamespace>
+    <ProjectGuid>{B5265FF0-E65D-433D-8635-9C8CBC6C5381}</ProjectGuid>
+    <RootNamespace>TupleTest</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -38,9 +43,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetExt>.lib</TargetExt>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -65,57 +68,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="Gui\Animation.h" />
-    <ClInclude Include="Gui\Application.h" />
-    <ClInclude Include="Gui\Brush.h" />
-    <ClInclude Include="Gui\Common.h" />
-    <ClInclude Include="Gui\Control.h" />
-    <ClInclude Include="Gui\EventArgs.h" />
-    <ClInclude Include="Gui\EventHandler.h" />
-    <ClInclude Include="Gui\Font.h" />
-    <ClInclude Include="Gui\Graphics.h" />
-    <ClInclude Include="Gui\GraphicsBasis.h" />
-    <ClInclude Include="Gui\NativeWindows.h" />
-    <ClInclude Include="Gui\Observers.h" />
-    <ClInclude Include="Gui\Panel.h" />
-    <ClInclude Include="Gui\Shapes.h" />
-    <ClInclude Include="Gui\SystemHelper.h" />
-    <ClInclude Include="Gui\UIElement.h" />
-    <ClInclude Include="Gui\Visual.h" />
-    <ClInclude Include="Gui\WindowBase.h" />
-    <ClInclude Include="Stl\algorithm.h" />
-    <ClInclude Include="Stl\algo_internal.h" />
-    <ClInclude Include="Stl\basic.h" />
-    <ClInclude Include="Stl\binary_search_tree.h" />
-    <ClInclude Include="Stl\def_internal.h" />
-    <ClInclude Include="Stl\functional.h" />
-    <ClInclude Include="Stl\iterator.h" />
-    <ClInclude Include="Stl\memory.h" />
-    <ClInclude Include="Stl\traits_constant.h" />
-    <ClInclude Include="Stl\traits_internal.h" />
-    <ClInclude Include="Stl\tuple.h" />
-    <ClInclude Include="Stl\type_traits.h" />
-    <ClInclude Include="Stl\utility.h" />
-    <ClInclude Include="Stl\utility_internal.h" />
-    <ClInclude Include="Stl\__allocator.h" />
-    <ClInclude Include="Stl\__is_mem_func_obj.h" />
-    <ClInclude Include="Stl\__swap.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Gui\Application.cpp" />
-    <ClCompile Include="Gui\Brush.cpp" />
-    <ClCompile Include="Gui\Graphics.cpp" />
-    <ClCompile Include="Gui\GraphicsBasis.cpp" />
-    <ClCompile Include="Gui\NativeWindows.cpp" />
-    <ClCompile Include="Gui\Panel.cpp" />
-    <ClCompile Include="Gui\Shapes.cpp" />
-    <ClCompile Include="Gui\UIElement.cpp" />
-    <ClCompile Include="Gui\WindowBase.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\README.md" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
