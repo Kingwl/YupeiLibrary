@@ -105,7 +105,7 @@ namespace Yupei
 	struct IsMemberFunctionHelper<R(CALL_OPT Class::*)(Args...)CV_OPT REF_OPT> \
 {\
 	using ClassType = Class;\
-	using ReturnType = R;	\
+	using result_type = R;	\
 	using BoolType = true_type;\
 };
 	namespace Internal
@@ -124,7 +124,7 @@ namespace Yupei
 	struct IsMemberFunctionHelper<R(Class::*)(Args..., ...)CV_OPT REF_OPT> \
 {\
 	using ClassType = Class;\
-	using ReturnType = R;	\
+	using result_type = R;	\
 	using BoolType = true_type;\
 };
 	namespace Internal
@@ -136,7 +136,7 @@ namespace Yupei
 	template<typename R,typename... Args>\
 	struct IsFunctionHelper<R CALL_OPT (Args...)>\
 	{\
-		using ReturnType = R;\
+		using result_type = R;\
 		using BoolType = true_type;\
 	};
 
@@ -156,7 +156,7 @@ namespace Yupei
 		template<typename R, typename... Args>
 		struct IsFunctionHelper<R(Args..., ...)>
 		{
-			using ReturnType = R;
+			using result_type = R;
 			using BoolType = true_type;
 		};
 	}

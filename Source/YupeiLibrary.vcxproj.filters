@@ -121,6 +121,12 @@
     <ClInclude Include="Stl\__allocator.h">
       <Filter>Stl</Filter>
     </ClInclude>
+    <ClInclude Include="Stl\__reference_wrapper.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\__addressof.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gui\Application.cpp">

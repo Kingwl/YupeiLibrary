@@ -98,8 +98,10 @@
     <ClInclude Include="Stl\type_traits.h" />
     <ClInclude Include="Stl\utility.h" />
     <ClInclude Include="Stl\utility_internal.h" />
+    <ClInclude Include="Stl\__addressof.h" />
     <ClInclude Include="Stl\__allocator.h" />
     <ClInclude Include="Stl\__is_mem_func_obj.h" />
+    <ClInclude Include="Stl\__reference_wrapper.h" />
     <ClInclude Include="Stl\__swap.h" />
   </ItemGroup>
   <ItemGroup>

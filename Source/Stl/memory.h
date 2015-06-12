@@ -13,6 +13,7 @@ namespace Yupei
 		//using reference = Extension::DefaultOrOtherType<allocator_type, reference, value_type&>;
 	};
 
+	
 	template<typename PointerType,typename DeleterType>
 	class unique_ptr;
 }

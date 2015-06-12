@@ -3,30 +3,72 @@
 #include "__allocator.h"
 #include "type_traits.h"
 #include "__swap.h"
+#include "__reference_wrapper.h"
 
 namespace Yupei
 {
-
+	//20.4.2, class template tuple:
+	// template <class... Types> class tuple;
+	//20.4.2.4, tuple creation functions:
+	// const unspecified ignore;
+	// template <class... Types>
+	// constexpr tuple<VTypes ...> make_tuple(Types&&...);
+	// template <class... Types>
+	// constexpr tuple<Types&&...> forward_as_tuple(Types&&...) noexcept;
+	// template<class... Types>
+	// constexpr tuple<Types&...> tie(Types&...) noexcept;
+	// template <class... Tuples>
+	// constexpr tuple<Ctypes ...> tuple_cat(Tuples&&...);
+	//20.4.2.5, tuple helper classes:
+	// template <class T> class tuple_size; // undefined
+	// template <class T> class tuple_size<const T>;
+	// template <class T> class tuple_size<volatile T>;
+	// template <class T> class tuple_size<const volatile T>;
+	// template <class... Types> class tuple_size<tuple<Types...> >;
+	// template <size_t I, class T> class tuple_element; // undefined
+	// template <size_t I, class T> class tuple_element<I, const T>;
+	// template <size_t I, class T> class tuple_element<I, volatile T>;
+	// template <size_t I, class T> class tuple_element<I, const volatile T>;
+	// template <size_t I, class... Types> class tuple_element<I, tuple<Types...> >;
+	// template <size_t I, class T>
+	// using tuple_element_t = typename tuple_element<I, T>::type;
+	//20.4.2.6, element access:
+	// template <size_t I, class... Types>
+	// constexpr tuple_element_t<I, tuple<Types...>>&
+	// get(tuple<Types...>&) noexcept;
+	// template <size_t I, class... Types>
+	// constexpr tuple_element_t<I, tuple<Types...>>&&
+	// get(tuple<Types...>&&) noexcept;
+	// template <size_t I, class... Types>
+	// constexpr const tuple_element_t<I, tuple<Types...>>&
+	// get(const tuple<Types...>&) noexcept;
+	// template <class T, class... Types>
+	// constexpr T& get(tuple<Types...>& t) noexcept;
+	// template <class T, class... Types>
+	// constexpr T&& get(tuple<Types...>&& t) noexcept;
+	// template <class T, class... Types>
+	// constexpr const T& get(const tuple<Types...>& t) noexcept;
+	//20.4.2.7, relational operators:
+	// template<class... TTypes, class... UTypes>
+	// constexpr bool operator==(const tuple<TTypes...>&, const tuple<UTypes...>&);
+	// template<class... TTypes, class... UTypes>
+	// constexpr bool operator<(const tuple<TTypes...>&, const tuple<UTypes...>&);
+	// template<class... TTypes, class... UTypes>
+	// constexpr bool operator!=(const tuple<TTypes...>&, const tuple<UTypes...>&);
+	// template<class... TTypes, class... UTypes>
+	// constexpr bool operator>(const tuple<TTypes...>&, const tuple<UTypes...>&);
+	// template<class... TTypes, class... UTypes>
+	// constexpr bool operator<=(const tuple<TTypes...>&, const tuple<UTypes...>&);
+	// template<class... TTypes, class... UTypes>
+	// constexpr bool operator>=(const tuple<TTypes...>&, const tuple<UTypes...>&);
+	//20.4.2.8, allocator-related traits
+	// template <class... Types, class Alloc>
+	// struct uses_allocator<tuple<Types...>, Alloc>;
+	//20.4.2.9, specialized algorithms:
+	// template <class... Types>
+	// void swap(tuple<Types...>& x, tuple<Types...>& y) noexcept(see below );
 	//constexpr implement
-	template<typename Type, typename... Args>
-	constexpr bool static_and(Type&& t, Args&&... args)
-	{
-		return t && static_and(args...);
-	}
-
-	template<typename Type>
-	constexpr bool static_and(Type&& t)
-	{
-		return t;
-	}
-
-	struct tuple_alloc_t {};
-	constexpr tuple_alloc_t tuple_alloc{};
-
-	template<typename T1,
-		typename T2>
-	struct pair;
-
+	
 	//template <class... Types>
 	//class tuple {
 	//public:
@@ -78,6 +120,26 @@ namespace Yupei
 	//								  // 20.4.2.3, tuple swap
 	//void swap(tuple&) noexcept(see below);
 	//};
+
+	template<typename Type, typename... Args>
+	constexpr bool static_and(Type&& t, Args&&... args)
+	{
+		return t && static_and(args...);
+	}
+
+	template<typename Type>
+	constexpr bool static_and(Type&& t)
+	{
+		return t;
+	}
+
+	struct tuple_alloc_t {};
+	constexpr tuple_alloc_t tuple_alloc{};
+
+	template<typename T1,
+		typename T2>
+	struct pair;
+
 
 	struct ignore_t
 	{
@@ -171,7 +233,7 @@ namespace Yupei
 		tuple_value_wrapper(tuple_value_wrapper&&) = default;
 
 		template<typename U>
-		my_type& operator=(const tuple_value_wrapper<U>& u) noexcept(is_nothrow_assignable<internal_type&, U&&>::value)
+		my_type& operator=(const tuple_value_wrapper<U>& u) 
 		{
 			Value = u.Value;
 			return *this;
@@ -287,16 +349,14 @@ namespace Yupei
 			
 		}
 
-		/*constexpr tuple(const ThisType& thisValue, const Args&... args) noexcept(
-			static_and(is_nothrow_copy_constructible<
-			ThisType>::value,is_nothrow_copy_constructible<Args>::value...>))
+		explicit constexpr tuple(const ThisType& thisValue, const Args&... args) noexcept(static_and(is_nothrow_copy_constructible<ThisType>::value,is_nothrow_copy_constructible<Args>::value...))
 			:this_value(thisValue),
 			base_type(args...)
 		{
 
 		}
 
-		constexpr tuple(ThisType&& thisValue, Args&&... args) noexcept(
+/*		constexpr tuple(ThisType&& thisValue, Args&&... args) noexcept(
 			static_and(is_nothrow_move_constructible<
 			ThisType>::value, is_nothrow_move_constructible<Args>::value...))
 			:this_value(Yupei::forward<ThisType&&>(thisValue)),
@@ -353,7 +413,7 @@ namespace Yupei
 		}
 
 		template<typename Alloc>
-		tuple(allocator_arg_t,
+		explicit tuple(allocator_arg_t,
 			const Alloc& a,
 			const ThisType& t,
 			const Args&... args)
@@ -394,7 +454,7 @@ namespace Yupei
 
 		template<typename Alloc,
 			typename... U>
-			tuple(allocator_arg_t, const Alloc& a, const tuple<U...>& rhs)
+		explicit tuple(allocator_arg_t, const Alloc& a, const tuple<U...>& rhs)
 			:this_value(allocator_arg, a, rhs.this_value),
 			base_type(allocator_arg, a,rhs.get_sliced())
 		{
@@ -403,7 +463,7 @@ namespace Yupei
 
 		template<typename Alloc,
 			typename... U>
-		tuple(allocator_arg_t, const Alloc& a, tuple<U...>&& rhs)
+		explicit tuple(allocator_arg_t, const Alloc& a, tuple<U...>&& rhs)
 			:this_value(allocator_arg, a, Yupei::forward<typename tuple<U...>::this_type&&>(rhs.this_value)),
 			base_type(allocator_arg, a, Yupei::forward<typename tuple<U...>::base_type&&>(rhs.get_sliced()))
 		{
@@ -454,7 +514,22 @@ namespace Yupei
 
 		template<typename Type,
 			typename... Args>
-			tuple& operator=(tuple<Type, Args...>&& rhs)
+			tuple& operator=(tuple<Type, Args...>&& rhs) 
+		{
+			this_value = Yupei::forward<tuple<Type, Args...>&&>(rhs).this_value;
+			get_sliced() = Yupei::forward<tuple<Type, Args...>&&>(rhs).get_sliced();
+			return *this;
+		}
+
+		
+		tuple& operator=(const tuple& rhs)
+		{
+			this_value = rhs.this_value;
+			get_sliced() = rhs.get_sliced();
+			return *this;
+		}
+
+		tuple& operator=(tuple&& rhs) noexcept(static_and(is_nothrow_move_constructible<Type>::value, is_nothrow_move_constructible<Args>::value...))
 		{
 			this_value = Yupei::forward<tuple<Type, Args...>&&>(rhs).this_value;
 			get_sliced() = Yupei::forward<tuple<Type, Args...>&&>(rhs).get_sliced();
@@ -657,26 +732,135 @@ namespace Yupei
 	};
 
 	template< std::size_t I, typename... Types,typename = enable_if_t< (I < sizeof...(Types)) > >
-	constexpr tuple_element_t<I, tuple<Types...> >& get(tuple<Types...>&t)
+	inline constexpr tuple_element_t<I, tuple<Types...> >& get(tuple<Types...>&t)
 	{
 		return static_cast<Internal::make_tuple_type_t<tuple<Types...>,sizeof...(Types),I>&>(t).get();
 	}
 
 	template< std::size_t I, typename... Types, typename = enable_if_t<( I < sizeof...(Types))>  >
-	constexpr const tuple_element_t<I, tuple<Types...> >& get(const tuple<Types...>& t)
+	inline constexpr const tuple_element_t<I, tuple<Types...> >& get(const tuple<Types...>& t)
 	{
 		return static_cast<const Internal::make_tuple_type_t<tuple<Types...>, sizeof...(Types), I>&>(t).get();
 	}
 
 	template< std::size_t I, typename... Types, typename = enable_if_t< (I < sizeof...(Types)) >  >
-	constexpr tuple_element_t<I, tuple<Types...> >&& get(tuple<Types...>&& t)
+	inline constexpr tuple_element_t<I, tuple<Types...> >&& get(tuple<Types...>&& t)
 	{
 		return static_cast<Internal::make_tuple_type_t<tuple<Types...>, sizeof...(Types), I>&&>(t).get();
 	}
 
 	template<typename... Args>
-	constexpr tuple<Args&...> tie(Args&... t) noexcept
+	inline constexpr tuple<Args&...> tie(Args&... t) noexcept
 	{
 		return tuple<Args&...>{t...};
 	}
+
+	namespace Internal
+	{
+		template<typename TypeToFind,
+			typename Type,
+			std::size_t NowIndex>
+		struct get_tuple_by_type_checker;
+
+		template<typename TypeToFind,
+			typename Type,
+		std::size_t NowIndex>
+		struct get_tuple_by_type_impl;
+
+		template<typename TypeToFind,
+			typename Type
+		>
+		struct get_tuple_by_type;
+
+		template<typename TypeToFind,
+			typename Type,
+			typename... Args,
+			std::size_t NowIndex>
+		struct get_tuple_by_type_impl < TypeToFind, tuple<Type, Args...>,NowIndex>
+		{
+			static constexpr std::size_t value = conditional_t <
+				is_same<TypeToFind, Type>::value,
+				get_tuple_by_type_checker<TypeToFind,tuple<Args...>,NowIndex >,//find it,check. 
+				get_tuple_by_type_impl < TypeToFind, tuple<Args...>, NowIndex + 1 >
+				>::value;
+		};
+
+		template<typename TypeToFind,
+			std::size_t NowIndex>
+		struct get_tuple_by_type_impl < TypeToFind, tuple<>, NowIndex>
+		{
+			static constexpr std::size_t value = -1;
+		};
+
+
+		template<typename TypeToFind,
+			typename... Args,
+			std::size_t NowIndex>
+		struct get_tuple_by_type_checker<TypeToFind,tuple<Args...>,NowIndex>
+		{
+			static_assert(get_tuple_by_type_impl<TypeToFind, tuple<Args...>, 0>::value == -1, "tuple get<>() type duplicate");
+			static constexpr std::size_t value = NowIndex;
+		};
+
+		template<typename TypeToFind,
+			typename... Args
+		>
+		struct get_tuple_by_type<TypeToFind, tuple<Args...>>
+		{
+			static constexpr std::size_t value = get_tuple_by_type_impl<
+				TypeToFind,
+				tuple<Args...>,
+				0>::value;
+			static_assert(value != -1, "type not found.");
+		};
+	}
+	template< typename Type, typename... Types>
+	inline constexpr decltype(auto) get(tuple<Types...>&& t) noexcept
+	{
+		return Yupei::get<Internal::get_tuple_by_type<Type, tuple<Types...>>::value >(Yupei::forward<tuple<Types...>&&>(t));
+	}
+
+	template< typename Type, typename... Types >
+	inline constexpr decltype(auto) get(tuple<Types...>& t) noexcept
+	{
+		return  Yupei::get<Internal::get_tuple_by_type<Type, tuple<Types...>>::value >(t);
+	}
+
+	template< typename Type, typename... Types >
+	inline constexpr decltype(auto) get(const tuple<Types...>& t) noexcept
+	{
+		return  Yupei::get<Internal::get_tuple_by_type<Type, tuple<Types...>>::value >(t);
+	}
+
+	namespace Internal
+	{
+		template<typename Type>
+		struct tuple_ret_type_impl
+		{
+			using type = Type;
+		};
+
+		template<typename Type>
+		struct tuple_ret_type_impl<Yupei::reference_wrapper<Type>>
+		{
+			using type = add_lvalue_reference_t<Type>;
+		};
+
+		template<typename Type>
+		using tuple_ret_type = typename tuple_ret_type_impl<decay_t<Type>>::type;
+
+	}
+
+	template<typename... Types>
+	inline constexpr decltype(auto) make_tuple(Types&&... t)
+	{
+		return tuple<Internal::tuple_ret_type<Types>...>(Yupei::forward<Types>(t)...);
+	}
+
+	template<class... Types>
+	inline constexpr tuple<Types&&...> forward_as_tuple(Types&&... t) noexcept
+	{
+		return tuple<Types&&...>(Yupei::forward<Types>(t)...)
+	}
 }
+   
