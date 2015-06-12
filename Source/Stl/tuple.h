@@ -79,6 +79,17 @@ namespace Yupei
 	//void swap(tuple&) noexcept(see below);
 	//};
 
+	struct ignore_t
+	{
+		template<typename U>
+		const ignore_t& operator =(U&& u) const noexcept
+		{
+			return *this;
+		}
+	};
+
+	const ignore_t ignore{};
+
 	template<typename... Args>
 	struct tuple;
 
@@ -95,7 +106,7 @@ namespace Yupei
 
 		}
 
-		tuple_value_wrapper(const internal_type & value) noexcept(is_nothrow_constructible<ValueType,internal_type>::value)
+		explicit tuple_value_wrapper(const internal_type & value) noexcept(is_nothrow_constructible<ValueType,internal_type>::value)
 			:Value(value)
 		{
 
@@ -160,16 +171,22 @@ namespace Yupei
 		tuple_value_wrapper(tuple_value_wrapper&&) = default;
 
 		template<typename U>
-		my_type& operator=(U&& u) noexcept(is_nothrow_assignable<internal_type&, U&&>::value)
+		my_type& operator=(const tuple_value_wrapper<U>& u) noexcept(is_nothrow_assignable<internal_type&, U&&>::value)
 		{
-			Value = Yupei::forward<U>(u);
+			Value = u.Value;
 			return *this;
 		}
 
-		int swap(my_type& rhs) noexcept(is_nothrow_swappable<my_type>::value)
+		template<typename U>
+		my_type& operator=(tuple_value_wrapper<U>&& u) noexcept(is_nothrow_assignable<internal_type&, U&&>::value)
 		{
-			swap(Value, rhs);
-			return 0;
+			Value = Yupei::forward<U>(u).Value;
+			return *this;
+		}
+
+		void swap(my_type& rhs) noexcept(is_nothrow_swappable<my_type>::value)
+		{
+			Yupei::swap(Value, rhs.Value);
 		}
 		ValueType& get() noexcept
 		{
@@ -178,6 +195,18 @@ namespace Yupei
 		const ValueType& get() const noexcept
 		{
 			return Value;
+		}
+
+		template<typename Type>
+		bool Less(const tuple_value_wrapper<Type>& t) const
+		{
+			return Value < t.Value;
+		}
+
+		template<typename Type>
+		bool Equal(const tuple_value_wrapper<Type>& t) const
+		{
+			return Value == t.Value;
 		}
 		
 	};
@@ -215,10 +244,23 @@ namespace Yupei
 
 		tuple& operator=(const tuple&) noexcept
 		{
-
+			return *this;
 		}
 
+		tuple& operator=(tuple&&) noexcept
+		{
+			return *this;
+		}
 
+		bool Less(const tuple& rhs) const noexcept
+		{
+			return false;
+		}
+
+		bool Equal(const tuple& rhs) const noexcept
+		{
+			return true;
+		}
 		
 	};
 
@@ -245,7 +287,7 @@ namespace Yupei
 			
 		}
 
-		constexpr tuple(const ThisType& thisValue, const Args&... args) noexcept(
+		/*constexpr tuple(const ThisType& thisValue, const Args&... args) noexcept(
 			static_and(is_nothrow_copy_constructible<
 			ThisType>::value,is_nothrow_copy_constructible<Args>::value...>))
 			:this_value(thisValue),
@@ -262,8 +304,9 @@ namespace Yupei
 		{
 
 		}
-
-		template<typename UThisType, typename... UArgs>
+*/
+		template<typename UThisType, typename... UArgs,
+		typename = enable_if_t<!is_one_of<decay_t<UThisType>,allocator_arg_t,tuple>::value>>
 		explicit constexpr tuple(UThisType&& thisValue,UArgs&&... args)
 			:this_value(Yupei::forward<UThisType>(thisValue)),
 			base_type(Yupei::forward<UArgs>(args)...)
@@ -310,7 +353,7 @@ namespace Yupei
 		}
 
 		template<typename Alloc>
-		explicit tuple(allocator_arg_t,
+		tuple(allocator_arg_t,
 			const Alloc& a,
 			const ThisType& t,
 			const Args&... args)
@@ -376,7 +419,96 @@ namespace Yupei
 		{
 			return this_value.get();
 		}
+
+		void swap(tuple& rhs) noexcept(static_and(is_nothrow_swappable<tuple_value_wrapper<ThisType>>::value,
+			is_nothrow_swappable<Args>::value...))
+		{
+			this_value.swap(rhs.this_value);
+			get_sliced().swap(rhs.get_sliced());
+		}
+
+		template<typename UType,
+			typename... UArgs,
+			typename = enable_if_t<sizeof...(UArgs) == sizeof...(Args)>>
+			bool Less(const tuple<UType, UArgs...>& rhs) const
+		{
+			return this_value.Less(rhs.this_value) && get_sliced().Less(rhs.get_sliced());
+		}
+
+		template<typename UType,
+			typename... UArgs,
+			typename = enable_if_t<sizeof...(UArgs) == sizeof...(Args) >>
+			bool Equal(const tuple<UType, UArgs...>& rhs) const
+		{
+			return this_value.Equal(rhs.this_value) && get_sliced().Equal(rhs.get_sliced());
+		}
+
+		template<typename Type,
+		typename... Args>
+		tuple& operator=(const tuple<Type,Args...>& rhs)
+		{
+			this_value = rhs.this_value;
+			get_sliced() = rhs.get_sliced();
+			return *this;
+		}
+
+		template<typename Type,
+			typename... Args>
+			tuple& operator=(tuple<Type, Args...>&& rhs)
+		{
+			this_value = Yupei::forward<tuple<Type, Args...>&&>(rhs).this_value;
+			get_sliced() = Yupei::forward<tuple<Type, Args...>&&>(rhs).get_sliced();
+			return *this;
+		}
 	};
+
+	template<typename... Args>
+	void swap(tuple<Args...>& lhs, tuple<Args...>& rhs)
+	{
+		lhs.swap(rhs);
+	}
+
+	template<typename... Args,
+		typename... UArgs>
+	constexpr bool operator == (const tuple<Args...>& lhs, const tuple<UArgs...>& rhs)
+	{
+		return lhs.Equal(rhs);
+	}
+
+	template<typename... Args,
+		typename... UArgs>
+		constexpr bool operator < (const tuple<Args...>& lhs, const tuple<UArgs...>& rhs)
+	{
+		return lhs.Less(rhs);
+	}
+
+	template<typename... Args,
+		typename... UArgs>
+		constexpr bool operator != (const tuple<Args...>& lhs, const tuple<UArgs...>& rhs)
+	{
+		return !lhs.Equal(rhs);
+	}
+
+	template<typename... Args,
+		typename... UArgs>
+		constexpr bool operator > (const tuple<Args...>& lhs, const tuple<UArgs...>& rhs)
+	{
+		return rhs.Less(lhs);
+	}
+
+	template<typename... Args,
+		typename... UArgs>
+		constexpr bool operator <= (const tuple<Args...>& lhs, const tuple<UArgs...>& rhs)
+	{
+		return !rhs.Less(lhs);
+	}
+
+	template<typename... Args,
+		typename... UArgs>
+		constexpr bool operator >= (const tuple<Args...>& lhs, const tuple<UArgs...>& rhs)
+	{
+		return !lhs.Less(rhs);
+	}
 
 	namespace Internal
 	{
@@ -411,8 +543,6 @@ namespace Yupei
 			static_assert(N == 0, "Out of tuple range.");
 			static_assert(N != 0, "Out of tuple range.");
 		};
-
-		
 	}
 
 	template<std::size_t Id,
@@ -421,9 +551,11 @@ namespace Yupei
 
 	template<std::size_t Id,
 		typename... Args>
-	class tuple_element<Id, tuple<Args...>> : public Internal::tuple_element_impl<0,Id,tuple<Args...>>
+	class tuple_element<Id, tuple<Args...>>  
 	{
-
+		static_assert(Id < sizeof...(Args), "tuple_element<> out of range");
+	public:
+		using type = typename Internal::tuple_element_impl<0, Id, tuple<Args...>>::type;
 	};
 
 	template<std::size_t Id,
@@ -474,6 +606,7 @@ namespace Yupei
 			>
 		struct make_tuple_type<tuple<Args...>, tuple<UArgs...>,Ep, Sp>
 		{
+			static_assert(Sp <= Ep, "Start > End!");
 			using type = typename make_tuple_type<tuple<Args...>, tuple < UArgs..., tuple_element_t<Sp, tuple<Args...>>>, Ep,Sp + 1>::type;
 		};
 
@@ -494,9 +627,56 @@ namespace Yupei
 		using make_tuple_type_t = typename make_tuple_type<Type, tuple<>, Ep, Sp>::type;
 	}
 
-	template< std::size_t I, typename... Types >
-	constexpr tuple_element_t<I, tuple<Types...> >& get(tuple<Types...>& t)
+	template<typename Type>
+	class tuple_size;
+
+	template<typename... Args>
+	class tuple_size<tuple<Args...>> : public integral_constant<
+		std::size_t,
+		sizeof...(Args)>
 	{
-		return static_cast<Internal::make_tuple_type_t<tuple<Types...>,I+1>&>(t).get();
+
+	};
+
+	template< typename T >
+	class tuple_size<const T> : public integral_constant<std::size_t, tuple_size<T>::value>
+	{
+
+	};
+	
+	template< typename T >
+	class tuple_size<volatile T> : public integral_constant<std::size_t, tuple_size<T>::value>
+	{
+
+	};
+
+	template< typename T >
+	class tuple_size<const volatile T> : public integral_constant<std::size_t, tuple_size<T>::value>
+	{
+
+	};
+
+	template< std::size_t I, typename... Types,typename = enable_if_t< (I < sizeof...(Types)) > >
+	constexpr tuple_element_t<I, tuple<Types...> >& get(tuple<Types...>&t)
+	{
+		return static_cast<Internal::make_tuple_type_t<tuple<Types...>,sizeof...(Types),I>&>(t).get();
+	}
+
+	template< std::size_t I, typename... Types, typename = enable_if_t<( I < sizeof...(Types))>  >
+	constexpr const tuple_element_t<I, tuple<Types...> >& get(const tuple<Types...>& t)
+	{
+		return static_cast<const Internal::make_tuple_type_t<tuple<Types...>, sizeof...(Types), I>&>(t).get();
+	}
+
+	template< std::size_t I, typename... Types, typename = enable_if_t< (I < sizeof...(Types)) >  >
+	constexpr tuple_element_t<I, tuple<Types...> >&& get(tuple<Types...>&& t)
+	{
+		return static_cast<Internal::make_tuple_type_t<tuple<Types...>, sizeof...(Types), I>&&>(t).get();
+	}
+
+	template<typename... Args>
+	constexpr tuple<Args&...> tie(Args&... t) noexcept
+	{
+		return tuple<Args&...>{t...};
 	}
 }

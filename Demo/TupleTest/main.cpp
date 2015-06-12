@@ -1,27 +1,23 @@
 #include "..\..\Source\Stl\tuple.h"
 #include <iostream>
+#include <vector>
+#include <memory>
+#include <string>
 
-//template<typename T,
-//typename...Args,
-//std::enable_if_t<
-//	sizeof...(Args) != 0 ||
-//	(sizeof...(Args) == 0 && !std::is_same<std::decay_t<T>, int>::value) >>
-//void foo(T&& t, Args... args)
-//{
-//	std::cout << 1;
-//}
-//
-//void foo(const int& i)
-//{
-//	std::cout << 2;
-//}
 
 int main()
 {
 	Yupei::tuple<int, char,float,int,int> t1{ 1,2 };
 	auto t2 = t1;
-	//auto x = Yupei::get<1>(t1);
-
-
+	Yupei::tuple<int, char, float, int, int> t4{ 2,1 };
+	swap(t1, t4);
+	int a;
+	char b;
+	Yupei::tuple<int, char,std::string> t5{ 2,3,"hahah" };
+	Yupei::tie(a, b,Yupei::ignore) = t5;
+	std::cout << (t1 <= t4);
+	auto x = Yupei::get<3>(t1);
+	Yupei::tuple<std::vector<int>, std::vector<int>> t3{ Yupei::allocator_arg,std::allocator<int>{} };
+	Yupei::get<0>(t3).push_back(3);
 	return 0;
 }

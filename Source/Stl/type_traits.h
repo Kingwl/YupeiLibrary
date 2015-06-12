@@ -553,11 +553,13 @@ namespace Yupei
 		__has_trivial_destructor(Type)
 	>;
 
+	//internal error....
 	template<typename Type, typename... Args>
-	using is_nothrow_constructible = bool_constant<
-		//__is_nothrow_constructible(Type, Args...)
-		true
-	>;
+	using is_nothrow_constructible = std::is_nothrow_constructible<Type, Args...>;
+		/*integral_constant<
+		bool,
+		__is_nothrow_constructible(Type, Args...)>;*/
+	
 
 	template<typename Type>
 	using is_nothrow_default_constructible = is_nothrow_constructible<
