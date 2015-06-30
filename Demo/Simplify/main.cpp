@@ -2,6 +2,11 @@
 #include "..\..\Source\Stl\type_traits.h"
 #include <iostream>
 #include <typeinfo>
+#include <memory>
+
+#pragma warning(disable:4101)
+#pragma warning(disable:4091)
+#pragma warning(disable:4189)
 
 using namespace Yupei;
 
@@ -77,5 +82,8 @@ int main()
 	//constexpr auto y = sizeof(Yupei::aligned_union_t<12, int, char, float, double>);
 	//static_assert(sizeof(Yupei::aligned_union_t<12, int, char, float, double>)
 	//	== sizeof(std::aligned_union_t<12, int, char, float, double>), "error");
+	
+	auto ptr = std::make_shared<test>();
+	auto res = Yupei::invoke(&test::foo,ptr, 1);
 	return 0;
 }

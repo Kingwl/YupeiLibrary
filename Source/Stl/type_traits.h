@@ -1020,7 +1020,7 @@ namespace Yupei
 				(F f, T1&& t1, Args&&... args)
 				//->decltype(((*Yupei::forward<T1>(t1)).*f)(Yupei::forward<Args>(args)...))
 			{
-				return (*Yupei::forward<T1>(t1).*f)(Yupei::forward<Args>(args)...);
+				return ((*Yupei::forward<T1>(t1)).*f)(Yupei::forward<Args>(args)...);
 			}
 		};
 

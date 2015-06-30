@@ -2,8 +2,7 @@
 
 #include "__allocator.h"
 #include "type_traits.h"
-#include "__swap.h"
-#include "__reference_wrapper.h"
+#include "utility.h"
 
 namespace Yupei
 {
@@ -356,17 +355,11 @@ namespace Yupei
 
 		}
 
-/*		constexpr tuple(ThisType&& thisValue, Args&&... args) noexcept(
-			static_and(is_nothrow_move_constructible<
-			ThisType>::value, is_nothrow_move_constructible<Args>::value...))
-			:this_value(Yupei::forward<ThisType&&>(thisValue)),
-			base_type(Yupei::forward<Args&&>(args)...)
-		{
-
-		}
-*/
 		template<typename UThisType, typename... UArgs,
-		typename = enable_if_t<!is_one_of<decay_t<UThisType>,allocator_arg_t,tuple>::value>>
+		typename = enable_if_t<!is_one_of<
+			decay_t<UThisType>,
+			allocator_arg_t,
+			tuple>::value>>
 		explicit constexpr tuple(UThisType&& thisValue,UArgs&&... args)
 			:this_value(Yupei::forward<UThisType>(thisValue)),
 			base_type(Yupei::forward<UArgs>(args)...)
@@ -379,7 +372,7 @@ namespace Yupei
 
 
 		template<typename UThisType, typename... UArgs>
-		explicit constexpr tuple(tuple<UThisType, UArgs...>&& rhs)
+		constexpr tuple(tuple<UThisType, UArgs...>&& rhs)
 			:this_value(Yupei::forward<typename tuple<UThisType, UArgs...>::this_type>(rhs.this_value)),
 			base_type(Yupei::forward<typename tuple<UThisType, UArgs...>::base_type>(rhs))
 		{
@@ -387,7 +380,7 @@ namespace Yupei
 		}
 
 		template<typename UThisType, typename... UArgs>
-		explicit constexpr tuple(const tuple<UThisType, UArgs...>& rhs)
+		constexpr tuple(const tuple<UThisType, UArgs...>& rhs)
 			:this_value(rhs.this_value),
 			base_type(rhs.get_sliced())
 		{
@@ -413,7 +406,7 @@ namespace Yupei
 		}
 
 		template<typename Alloc>
-		explicit tuple(allocator_arg_t,
+		tuple(allocator_arg_t,
 			const Alloc& a,
 			const ThisType& t,
 			const Args&... args)
@@ -426,7 +419,7 @@ namespace Yupei
 		template<typename Alloc,
 			typename UThisType,
 			typename... UArgs>
-			explicit tuple(allocator_arg_t,
+		tuple(allocator_arg_t,
 				const Alloc& a,
 				UThisType&& u,
 				UArgs&&... args)
@@ -454,7 +447,7 @@ namespace Yupei
 
 		template<typename Alloc,
 			typename... U>
-		explicit tuple(allocator_arg_t, const Alloc& a, const tuple<U...>& rhs)
+		tuple(allocator_arg_t, const Alloc& a, const tuple<U...>& rhs)
 			:this_value(allocator_arg, a, rhs.this_value),
 			base_type(allocator_arg, a,rhs.get_sliced())
 		{
@@ -463,7 +456,7 @@ namespace Yupei
 
 		template<typename Alloc,
 			typename... U>
-		explicit tuple(allocator_arg_t, const Alloc& a, tuple<U...>&& rhs)
+		tuple(allocator_arg_t, const Alloc& a, tuple<U...>&& rhs)
 			:this_value(allocator_arg, a, Yupei::forward<typename tuple<U...>::this_type&&>(rhs.this_value)),
 			base_type(allocator_arg, a, Yupei::forward<typename tuple<U...>::base_type&&>(rhs.get_sliced()))
 		{
@@ -480,7 +473,8 @@ namespace Yupei
 			return this_value.get();
 		}
 
-		void swap(tuple& rhs) noexcept(static_and(is_nothrow_swappable<tuple_value_wrapper<ThisType>>::value,
+		void swap(tuple& rhs) noexcept(static_and(
+			is_nothrow_swappable<tuple_value_wrapper<ThisType>>::value,
 			is_nothrow_swappable<Args>::value...))
 		{
 			this_value.swap(rhs.this_value);
@@ -620,9 +614,7 @@ namespace Yupei
 		};
 	}
 
-	template<std::size_t Id,
-		typename Type>
-	class tuple_element;
+	
 
 	template<std::size_t Id,
 		typename... Args>
@@ -660,9 +652,7 @@ namespace Yupei
 			typename tuple_element<Id, T>::type>;
 	};
 
-	template<std::size_t Id,
-		typename T>
-	using tuple_element_t = typename tuple_element<Id, T>::type;
+
 
 	namespace Internal
 	{
@@ -702,9 +692,7 @@ namespace Yupei
 		using make_tuple_type_t = typename make_tuple_type<Type, tuple<>, Ep, Sp>::type;
 	}
 
-	template<typename Type>
-	class tuple_size;
-
+	
 	template<typename... Args>
 	class tuple_size<tuple<Args...>> : public integral_constant<
 		std::size_t,
@@ -832,24 +820,7 @@ namespace Yupei
 		return  Yupei::get<Internal::get_tuple_by_type<Type, tuple<Types...>>::value >(t);
 	}
 
-	namespace Internal
-	{
-		template<typename Type>
-		struct tuple_ret_type_impl
-		{
-			using type = Type;
-		};
-
-		template<typename Type>
-		struct tuple_ret_type_impl<Yupei::reference_wrapper<Type>>
-		{
-			using type = add_lvalue_reference_t<Type>;
-		};
-
-		template<typename Type>
-		using tuple_ret_type = typename tuple_ret_type_impl<decay_t<Type>>::type;
-
-	}
+	
 
 	template<typename... Types>
 	inline constexpr decltype(auto) make_tuple(Types&&... t)
