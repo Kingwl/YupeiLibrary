@@ -4,14 +4,28 @@
 #include <memory>
 #include <string>
 
+using namespace std::string_literals;
+
 #pragma warning(disable:4101)
 #pragma warning(disable:4091)
 #pragma warning(disable:4189)
 
-template<typename T1,
-	typename T2>
-	void foo(Yupei::pair<T1, T2>& p)
+template <class F, class Tuple, std::size_t... I>
+constexpr decltype(auto) apply_impl(F&& f, Tuple&& t, Yupei::index_sequence<I...>)
 {
+	return Yupei::invoke(Yupei::forward<F>(f), Yupei::get<I>(Yupei::forward<Tuple>(t))...);
+	// Note: std::invoke is a C++17 feature
+}
+template <class F, class Tuple>
+constexpr decltype(auto) apply(F&& f, Tuple&& t)
+{
+	return apply_impl(Yupei::forward<F>(f), Yupei::forward<Tuple>(t),
+		Yupei::make_index_sequence < Yupei::tuple_size<Yupei::decay_t<Tuple>>::value > {});
+}
+void foo(std::unique_ptr<int> p )
+{
+	std::cout << *p << std::endl;
+	std::system("pause");
 	//static_assert(Yupei::is_lvalue_reference<decltype(p.first)>::value, "haha");
 }
 
@@ -25,7 +39,7 @@ int main()
 	char b;
 	Yupei::tuple<int, char,std::string> t5{ 2,3,"hahah" };
 	Yupei::tie(a, b,Yupei::ignore) = t5;
-	std::cout << (t1 <= t4);
+	std::cout << (t1 <= t4) << std::endl;
 	auto x = Yupei::get<3>(t1);
 	Yupei::tuple<std::vector<int>, std::vector<int>> t3{ Yupei::allocator_arg,std::allocator<int>{} };
 	Yupei::get<0>(t3).push_back(3);
@@ -33,10 +47,19 @@ int main()
 	auto t6 = Yupei::make_tuple(li, b);
 	Yupei::is_trivially_copyable<Yupei::reference_wrapper<int>>::value;
 	auto f = Yupei::get<char>(t1);
-	Yupei::pair<int, char> p;
+	Yupei::pair<int, std::string> p;
 	auto py = Yupei::get<int>(p);
 	auto px = Yupei::get<0>(p);
 	p = Yupei::make_pair(2, 3);
-	foo(p);
+	//apply(foo, Yupei::make_tuple(2, "hahaha"s));
+	auto ptr = std::make_unique<int>();
+	auto footup = Yupei::make_tuple(std::move(ptr));
+	apply(foo, std::move(footup));
+
+	Yupei::pair<std::string, int> sip{ 
+		Yupei::piecewise_construct, 
+		Yupei::make_tuple(3,'c'),
+		Yupei::make_tuple(1) };
+
 	return 0;
 }

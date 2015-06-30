@@ -367,6 +367,14 @@ namespace Yupei
 			
 		}
 
+		template <class U1, class U2,
+		typename = enable_if_t<sizeof...(Args) == 2 &&
+		is_convertible<U1,>
+		explicit constexpr tuple(pair<U1, U2>&&) // only if sizeof...(Types) == 2
+		{
+
+		}
+
 		tuple(const tuple&) = default;
 		tuple(tuple&&) = default;
 
@@ -734,7 +742,7 @@ namespace Yupei
 	template< std::size_t I, typename... Types, typename = enable_if_t< (I < sizeof...(Types)) >  >
 	inline constexpr tuple_element_t<I, tuple<Types...> >&& get(tuple<Types...>&& t)
 	{
-		return static_cast<Internal::make_tuple_type_t<tuple<Types...>, sizeof...(Types), I>&&>(t).get();
+		return static_cast<Internal::make_tuple_type_t<tuple<Types...>, sizeof...(Types), I>&&>(t).this_value.Value;
 	}
 
 	template<typename... Args>
@@ -832,6 +840,31 @@ namespace Yupei
 	inline constexpr tuple<Types&&...> forward_as_tuple(Types&&... t) noexcept
 	{
 		return tuple<Types&&...>(Yupei::forward<Types>(t)...)
+	}
+
+	template<typename T1,typename T2>
+	template<class TupleType1,
+	class TupleType2,
+		std::size_t... Indexes1,
+		std::size_t... Indexes2>
+		pair<T1, T2>::pair(TupleType1& t1, TupleType2& t2,
+			index_sequence<Indexes1...>,
+			index_sequence<Indexes2...>)
+		:first(Yupei::get<Indexes1>(t1)...),
+		second(Yupei::get<Indexes2>(t2)...)
+	{
+
+	}
+
+	template<class T1,
+	class T2>
+		template<class... Types1,
+	class... Types2> inline
+		pair<T1, T2>::pair(piecewise_construct_t,
+			tuple<Types1...> Val1,
+			tuple<Types2...> Val2)
+		:pair(Val1, Val2, make_index_sequence<sizeof...(Types1)>{}, make_index_sequence<sizeof...(Types2)>{})
+	{	
 	}
 }
    
