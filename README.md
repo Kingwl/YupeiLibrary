@@ -10,7 +10,7 @@
  | Headers          |    Status           |
  | :---------------:|:-------------------:|
  | `<type_traits>`  |  Complete           |
- | `<tuple>`		|  Correcting...	  |
+ | `<tuple>`		|  Most		  		  |
  | `<utility>`      |  Complete           |
  | `<memory>`       |                     |
  | `<iterator>`     |                     |

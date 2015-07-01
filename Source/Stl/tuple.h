@@ -139,6 +139,50 @@ namespace Yupei
 		typename T2>
 	struct pair;
 
+	template<typename... Args>
+	struct tuple;
+
+	namespace Internal
+	{
+		template<typename T,
+			typename U>
+		struct tuple_enable;
+
+		template<>
+		struct tuple_enable<tuple<>, tuple<>> 
+		{
+			using type = true_type;
+		};
+
+		template<typename... Args>
+		struct tuple_enable<tuple<Args...>,tuple<>> 
+		{
+			using type = true_type;
+		};
+
+		template<typename... Args>
+		struct tuple_enable<tuple<>, tuple<Args...>>
+		{
+			using type = false_type;
+		};
+
+		template<typename T,
+			typename... Args,
+			typename U,
+			typename... UArgs>
+		struct tuple_enable<tuple<T, Args...>, tuple<U, UArgs...>> 
+		{
+			using type = bool_constant<
+				is_constructible<T, U>::value && 
+				tuple_enable<tuple<Args...>, tuple<UArgs...>>::type::value > ;
+		};
+
+		template<typename T,
+			typename U>
+			using tuple_enable_t =typename tuple_enable<T, U>::type;
+
+	}
+	
 
 	struct ignore_t
 	{
@@ -206,7 +250,7 @@ namespace Yupei
 
 		template<typename U,
 			typename Alloc>
-		explicit tuple_value_wrapper(integral_constant<int, 0>, const Alloc&, U&& u)
+		tuple_value_wrapper(integral_constant<int, 0>, const Alloc&, U&& u)
 			:Value(Yupei::forward<U>(u))
 		{
 
@@ -214,7 +258,7 @@ namespace Yupei
 
 		template<typename U,
 			typename Alloc>
-		explicit tuple_value_wrapper(integral_constant<int, 1>, const Alloc& alloc,U&& u)
+		tuple_value_wrapper(integral_constant<int, 1>, const Alloc& alloc,U&& u)
 			: Value(allocator_arg, alloc,Yupei::forward<U>(u))
 		{
 
@@ -222,7 +266,7 @@ namespace Yupei
 
 		template<typename U,
 			typename Alloc>
-		explicit tuple_value_wrapper(integral_constant<int, 2>, const Alloc& alloc,U&& u)
+		tuple_value_wrapper(integral_constant<int, 2>, const Alloc& alloc,U&& u)
 			: Value(Yupei::forward<U>(u),alloc)
 		{
 
@@ -241,7 +285,7 @@ namespace Yupei
 		template<typename U>
 		my_type& operator=(tuple_value_wrapper<U>&& u) noexcept(is_nothrow_assignable<internal_type&, U&&>::value)
 		{
-			Value = Yupei::forward<U>(u).Value;
+			Value = Yupei::forward<tuple_value_wrapper<U>&&>(u).Value;
 			return *this;
 		}
 
@@ -340,7 +384,8 @@ namespace Yupei
 		using base_type = tuple<Args...>;
 		using this_type = ThisType;
 		tuple_value_wrapper<ThisType> this_value;
-		constexpr tuple()  noexcept(static_and(is_nothrow_default_constructible<ThisType>::value,
+		constexpr tuple()  noexcept(
+			static_and(is_nothrow_default_constructible<ThisType>::value,
 			is_nothrow_default_constructible<Args>::value...))
 			:base_type(),
 			this_value()
@@ -348,18 +393,23 @@ namespace Yupei
 			
 		}
 
-		explicit constexpr tuple(const ThisType& thisValue, const Args&... args) noexcept(static_and(is_nothrow_copy_constructible<ThisType>::value,is_nothrow_copy_constructible<Args>::value...))
+		template<typename = enable_if_t<
+			Internal::tuple_enable_t<
+			tuple<ThisType, Args...>, 
+			tuple<const ThisType&, const Args&...>>::value >>
+		explicit constexpr tuple(const ThisType& thisValue, const Args&... args) 
+			noexcept(static_and(is_nothrow_copy_constructible<ThisType>::value,
+					is_nothrow_copy_constructible<Args>::value...))
 			:this_value(thisValue),
 			base_type(args...)
 		{
 
 		}
 
-		template<typename UThisType, typename... UArgs,
-		typename = enable_if_t<!is_one_of<
-			decay_t<UThisType>,
-			allocator_arg_t,
-			tuple>::value>>
+		template<typename UThisType, typename... UArgs, typename = enable_if_t<
+			sizeof...(Args) == sizeof...(UArgs) && Internal::tuple_enable_t<
+			 tuple<ThisType, Args...>,
+			tuple<UThisType&&, UArgs&&... >> ::value >>
 		explicit constexpr tuple(UThisType&& thisValue,UArgs&&... args)
 			:this_value(Yupei::forward<UThisType>(thisValue)),
 			base_type(Yupei::forward<UArgs>(args)...)
@@ -368,9 +418,22 @@ namespace Yupei
 		}
 
 		template <class U1, class U2,
-		typename = enable_if_t<sizeof...(Args) == 2 &&
-		is_convertible<U1,>
-		explicit constexpr tuple(pair<U1, U2>&&) // only if sizeof...(Types) == 2
+		typename = enable_if_t<sizeof...(Args) == 1 &&
+		is_convertible<U1&&,ThisType>::value && is_convertible<U2&&,Args...>::value>>
+		explicit constexpr tuple(pair<U1, U2>&& p) // only if sizeof...(Types) == 2
+			:this_value(Yupei::forward<pair<U1,U2>&&>(p).first),
+			base_type(Yupei::forward<pair<U1, U2>&&>(p).second)
+		{
+
+		}
+
+		template <class U1, class U2,
+			typename = enable_if_t<sizeof...(Args) == 1 &&
+			is_convertible<const U1&, ThisType>::value && 
+			is_convertible<const U2&, Args...>::value >>
+			explicit constexpr tuple(const pair<U1, U2>& p) // only if sizeof...(Types) == 2
+			:this_value(p.first),
+			base_type(p.second)
 		{
 
 		}
@@ -379,7 +442,10 @@ namespace Yupei
 		tuple(tuple&&) = default;
 
 
-		template<typename UThisType, typename... UArgs>
+		template<typename UThisType, typename... UArgs, typename = enable_if_t<
+			sizeof...(Args) == sizeof...(UArgs)&&Internal::tuple_enable_t<
+			tuple<ThisType, Args...>,
+			tuple<UThisType&&, UArgs&&... >> ::value >>
 		constexpr tuple(tuple<UThisType, UArgs...>&& rhs)
 			:this_value(Yupei::forward<typename tuple<UThisType, UArgs...>::this_type>(rhs.this_value)),
 			base_type(Yupei::forward<typename tuple<UThisType, UArgs...>::base_type>(rhs))
@@ -387,7 +453,10 @@ namespace Yupei
 
 		}
 
-		template<typename UThisType, typename... UArgs>
+		template<typename UThisType, typename... UArgs, typename = enable_if_t<
+			sizeof...(Args) == sizeof...(UArgs) && Internal::tuple_enable_t<
+			tuple<ThisType, Args...>,
+			tuple<const UThisType&, const UArgs&... >> ::value >>
 		constexpr tuple(const tuple<UThisType, UArgs...>& rhs)
 			:this_value(rhs.this_value),
 			base_type(rhs.get_sliced())
@@ -519,22 +588,36 @@ namespace Yupei
 			tuple& operator=(tuple<Type, Args...>&& rhs) 
 		{
 			this_value = Yupei::forward<tuple<Type, Args...>&&>(rhs).this_value;
-			get_sliced() = Yupei::forward<tuple<Type, Args...>&&>(rhs).get_sliced();
+			*((base_type*)this) = Yupei::forward<tuple<Args...>&&>((tuple<Args...>)rhs);
 			return *this;
 		}
 
-		
-		tuple& operator=(const tuple& rhs)
+		template<typename U1,typename U2,
+			typename = enable_if_t<sizeof...(Args) == 1 >>
+		tuple& operator=(const pair<U1,U2>& rhs)
 		{
-			this_value = rhs.this_value;
-			get_sliced() = rhs.get_sliced();
+			this_value.Value = rhs.first;
+			(*((base_type*)this)).this_value.Value = rhs.second;
 			return *this;
 		}
 
-		tuple& operator=(tuple&& rhs) noexcept(static_and(is_nothrow_move_constructible<Type>::value, is_nothrow_move_constructible<Args>::value...))
+		template<typename U1,
+			typename U2,
+		typename = enable_if_t<sizeof...(Args) == 1>>
+		tuple& operator=(pair<U1, U2>&& rhs)
 		{
-			this_value = Yupei::forward<tuple<Type, Args...>&&>(rhs).this_value;
-			get_sliced() = Yupei::forward<tuple<Type, Args...>&&>(rhs).get_sliced();
+			this_value = Yupei::forward<pair<U1,U2>&&>(rhs).first;
+			(*((base_type*)this)).this_value.Value = Yupei::forward<pair<U1, U2>&&>(rhs).second;
+			return *this;
+		}
+
+		//just for noexcept
+		tuple& operator=(tuple&& rhs) 
+			noexcept(static_and(is_nothrow_move_constructible<ThisType>::value, 
+				is_nothrow_move_constructible<Args>::value...))
+		{
+			this_value = Yupei::forward<tuple&&>(rhs).this_value;
+			*((base_type*)this) = Yupei::forward<base_type&&>((base_type)rhs);
 			return *this;
 		}
 	};
@@ -748,7 +831,7 @@ namespace Yupei
 	template<typename... Args>
 	inline constexpr tuple<Args&...> tie(Args&... t) noexcept
 	{
-		return tuple<Args&...>{t...};
+		return tuple<Args&...>(t...);
 	}
 
 	namespace Internal

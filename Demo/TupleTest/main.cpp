@@ -31,14 +31,20 @@ void foo(std::unique_ptr<int> p )
 
 int main()
 {
-	Yupei::tuple<int, char,float,int,int> t1{ 1,2 };
+	Yupei::Internal::tuple_enable_t<
+		Yupei::tuple<int, char, float, int, int>,
+		Yupei::tuple<const int&, const char&>> ::value;
+	auto t1 = Yupei::tuple<int, char, float, int, int>{1,2 ,3,4,5};
 	auto t2 = t1;
-	Yupei::tuple<int, char, float, int, int> t4{ 2,1 };
+	Yupei::tuple<int, char, float, int, int> t4{ 2,1,3,4,5 };
 	swap(t1, t4);
 	int a;
 	char b;
+	Yupei::tuple<std::unique_ptr<int>> tu;
+	Yupei::tuple<std::unique_ptr<int>> tu2;
+	tu = Yupei::move(tu);
 	Yupei::tuple<int, char,std::string> t5{ 2,3,"hahah" };
-	Yupei::tie(a, b,Yupei::ignore) = t5;
+	Yupei::tie(a, b, Yupei::ignore)= Yupei::move(t5);
 	std::cout << (t1 <= t4) << std::endl;
 	auto x = Yupei::get<3>(t1);
 	Yupei::tuple<std::vector<int>, std::vector<int>> t3{ Yupei::allocator_arg,std::allocator<int>{} };
@@ -48,6 +54,8 @@ int main()
 	Yupei::is_trivially_copyable<Yupei::reference_wrapper<int>>::value;
 	auto f = Yupei::get<char>(t1);
 	Yupei::pair<int, std::string> p;
+	Yupei::tuple<int, std::string> t8(p);
+	t8 = p;
 	auto py = Yupei::get<int>(p);
 	auto px = Yupei::get<0>(p);
 	p = Yupei::make_pair(2, 3);
