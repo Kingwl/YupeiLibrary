@@ -28,9 +28,6 @@
     <ClInclude Include="Stl\functional.h">
       <Filter>Stl</Filter>
     </ClInclude>
-    <ClInclude Include="Stl\iterator.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
     <ClInclude Include="Stl\memory.h">
       <Filter>Stl</Filter>
     </ClInclude>
@@ -125,6 +122,12 @@
       <Filter>Stl</Filter>
     </ClInclude>
     <ClInclude Include="Stl\__addressof.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\iterator.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\container_traits.h">
       <Filter>Stl</Filter>
     </ClInclude>
   </ItemGroup>

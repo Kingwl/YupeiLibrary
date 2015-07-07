@@ -88,6 +88,7 @@
     <ClInclude Include="Stl\algo_internal.h" />
     <ClInclude Include="Stl\basic.h" />
     <ClInclude Include="Stl\binary_search_tree.h" />
+    <ClInclude Include="Stl\container_traits.h" />
     <ClInclude Include="Stl\def_internal.h" />
     <ClInclude Include="Stl\functional.h" />
     <ClInclude Include="Stl\iterator.h" />
