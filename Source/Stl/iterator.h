@@ -335,7 +335,7 @@ namespace Yupei
 	}  // std
 
 	*/
-
+	
 	struct input_iterator_tag { };
 	struct output_iterator_tag { };
 	struct forward_iterator_tag : public input_iterator_tag { };
@@ -962,34 +962,117 @@ namespace Yupei
 		 return move_iterator<Iterator>(i);
 	 }
 
-	 template <class T, class charT = char, class traits = char_traits<charT>,
-	 class Distance = ptrdiff_t>
-	 class istream_iterator {
+	 template <class T, class charT = char, class traits = std::char_traits<charT>,
+	 class Distance = std::ptrdiff_t>
+	 class istream_iterator : public iterator<
+		 input_iterator_tag,
+		 T,
+		 Distance,
+		 const T*,
+		 const T&>
+	 {
 	 public:
-		 typedef input_iterator_tag iterator_category;
-		 typedef T value_type;
-		 typedef Distance difference_type;
-		 typedef const T* pointer;
-		 typedef const T& reference;
 		 typedef charT char_type;
 		 typedef traits traits_type;
-		 typedef basic_istream<charT, traits> istream_type;
-		 see below istream_iterator();
-		 istream_iterator(istream_type& s);
+		 typedef std::basic_istream<charT, traits> istream_type;
+		 constexpr istream_iterator()
+			 :in_stream(nullptr),
+			 value()
+		 {
+
+		 }
+		 istream_iterator(istream_type& s)
+			 :in_stream(&s)
+		 {
+			 if (!(*in_stream >> value))
+				 in_stream = 0;
+		 }
 		 istream_iterator(const istream_iterator& x) = default;
 		 ~istream_iterator() = default;
-		 const T& operator*() const;
-		 const T* operator->() const;
-		 istream_iterator& operator++();
-		 istream_iterator operator++(int);
+		 const T& operator*() const
+		 {
+			 return value;
+		 }
+		 const T* operator->() const
+		 {
+			 return &(operator*());
+		 }
+		 istream_iterator& operator++()
+		 {
+			 if (!(*in_stream >> value))
+				 in_stream = 0;
+			 return *this;
+		 }
+		 istream_iterator operator++(int)
+		 {
+			 auto tmp = *this;
+			 ++*this;
+			 return tmp;
+		 }
+		 template <class T, class charT, class traits, class Distance>
+		 friend bool operator==(const istream_iterator<T, charT, traits, Distance>& x,
+			 const istream_iterator<T, charT, traits, Distance>& y)
+		 {
+			 return x.in_stream == y.in_stream;
+		 }
+		 template <class T, class charT, class traits, class Distance>
+		 friend  bool operator!=(const istream_iterator<T, charT, traits, Distance>& x,
+			 const istream_iterator<T, charT, traits, Distance>& y)
+		 {
+			 return !(x == y);
+		 }
 	 private:
-		 basic_istream<charT, traits>* in_stream; // exposition only
+		 std::basic_istream<charT, traits>* in_stream; // exposition only
 		 T value; // exposition only
 	 };
-	 template <class T, class charT, class traits, class Distance>
-	 bool operator==(const istream_iterator<T, charT, traits, Distance>& x,
-		 const istream_iterator<T, charT, traits, Distance>& y);
-	 template <class T, class charT, class traits, class Distance>
-	 bool operator!=(const istream_iterator<T, charT, traits, Distance>& x,
-		 const istream_iterator<T, charT, traits, Distance>& y);
+
+	 template <class T, class charT = char, class traits = std::char_traits<charT> >
+	 class ostream_iterator {
+	 public:
+		 typedef output_iterator_tag iterator_category;
+		 typedef void value_type;
+		 typedef void difference_type;
+		 typedef void pointer;
+		 typedef void reference;
+		 typedef charT char_type;
+		 typedef traits traits_type;
+		 typedef std::basic_ostream<charT, traits> ostream_type;
+		 ostream_iterator(ostream_type& s)
+			 :out_stream(&s),
+			 delim(nullptr)
+		 {
+
+		 }
+		 ostream_iterator(ostream_type& s, const charT* delimiter)
+			 :out_stream(&s),
+			 delim(delimiter)
+		 {
+
+		 }
+		 ostream_iterator(const ostream_iterator& x) = default;
+		 ~ostream_iterator() = default;
+		 ostream_iterator& operator=(const T& value)
+		 {
+			 *out_stream << value;
+			 if (delim != 0)
+				 *out_stream << delim;
+			 return *this;
+		 }
+		 ostream_iterator& operator*()
+		 {
+			 return *this;
+		 }
+		 ostream_iterator& operator++()
+		 {
+			 return *this;
+		 }
+		 ostream_iterator& operator++(int)
+		 {
+			 return *this;
+		 }
+	 private:
+		 std::basic_ostream<charT, traits>* out_stream; // exposition only
+		 const charT* delim; // exposition only
+	 };
+	 
 }

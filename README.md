@@ -1,10 +1,17 @@
 #YupeiLibrary#
-&emsp;&emsp;A slightly modified copy of the STL in Visual C++ 2015 and a DirectUI library which takes full advantage of modern C++ (C++ 11/C++ 14). The STL part of the library is modified to satisfy my demand such as a free-list-based allocator and so on. 
+&emsp;&emsp; A library includes an STL-like basic library and a DirectUI GUI Framework on Windows with Direct2D.
 
 
-##TODO##
++ ##Basic Library##
+&emsp;&emsp; This part is a basic library which is a custom STL and combined with the C++ Technical Specification implement on Windows and provides
 
-+ ###STL Part###
+  + Type traits,which is the foundation of the whole basic library;
+  + Standard Containers (such as vector,list,etc.);
+  + Useful Algorithm with the abstract of iterators;
+  + Functional things like function;
+  + Smart pointers,which are very useful in GUI development,such as shared_ptr,unique_ptr,intrusive_ptr;
+  + Allocators aimed for high performance;
+  + Many useful extentions (like the C++ TS),such as filesystem,type-erased allocator,ranges and so on.
 
 
  | Headers          |    Status           |
@@ -13,8 +20,9 @@
  | `<tuple>`		|  Most		  		  |
  | `<utility>`      |  Complete           |
  | `<memory>`       |                     |
- | `<iterator>`     |  On the way         |
+ | `<iterator>`     |  Complete           |
  
  
  
-+ ###GUI Part###
++ ##GUI Part##
+&emsp;&emsp; Under construction.
