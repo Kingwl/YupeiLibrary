@@ -130,6 +130,9 @@
     <ClInclude Include="Stl\container_traits.h">
       <Filter>Stl</Filter>
     </ClInclude>
+    <ClInclude Include="memory_resource.h">
+      <Filter>Stl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Gui\Application.cpp">

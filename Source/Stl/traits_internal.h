@@ -180,51 +180,6 @@ namespace Yupei
 	template<typename Type>
 	using add_lvalue_reference_t = typename add_lvalue_reference<Type>::type;
 
-	namespace Extension
-	{
-
-		//for testing;
-		template<bool value, typename Type1, typename Type2>
-		struct TypeSelector
-		{
-			using type = Type2;
-		};
-
-		template<typename Type1, typename Type2>
-		struct TypeSelector<true, Type1, Type2>
-		{
-			using type = Type1;
-		};
-
-		struct WrapInt
-		{
-			WrapInt(int) {};
-		};
-
-		template<typename Type>
-		struct Identity
-		{
-			using type = Type;
-		};
-
-#define DEFAULT_OR_OTHER(DefaultType) \
-		{\
-			template<typename T>\
-			static auto _TestFunction(int)->Extension::Identity<typename T::DefaultType>;\
-			template<typename T>\
-			static auto _TestFunction(Extension::WrapInt)->Extension::Identity<OtherType>;\
-			using temp_type = decltype(_TestFunction<ParentType>(0));\
-			using type = typename temp_type::type;\
-		}
-
-		template<typename ParentType, typename OtherType>
-		struct GetPointer
-			DEFAULT_OR_OTHER(pointer);
-
-		template<typename ParentType, typename OtherType>
-		using GetPointerType = typename GetPointer<ParentType, OtherType>::type;
-	}
-
 	template<typename Type , typename... Args>
 	struct is_one_of;
 

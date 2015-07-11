@@ -23,4 +23,10 @@ namespace Yupei
 
 	template<typename Container>
 	using container_const_iterator = typename Container::const_iterator;
+
+	template<typename Container>
+	using container_allocator_type = typename Container::allocator_type;
+
+	template<typename Container>
+	using container_pointer = typename Container::pointer;
 }

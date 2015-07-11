@@ -2,11 +2,28 @@
 
 #include "basic.h"
 #include "type_traits.h"
+#include "utility_internal.h"
+#include "container_traits.h"
 
 namespace Yupei
 {
 	struct allocator_arg_t {};
 	constexpr allocator_arg_t allocator_arg{};
+
+//Remarks:
+//
+//	automatically detects whether T has a nested allocator_type that is convertible from Alloc.
+	//Meets the BinaryTypeTrait requirements(C++14 ¡ì20.10.1).The implementation shall 
+	//provide a definition that is derived from true_type if a type 
+	//T::allocator_type exists and either is_convertible_v<Alloc, T::allocator_type> != false or 
+	//T::allocator_type is an alias for std::experimental::erased_type(3.1.2), 
+	//otherwise it shall be derived from false_type.A program may specialize this template to 
+	//derive from true_type for a user - defined type T that does not have a nested allocator_type 
+	//but nonetheless can be constructed with an allocator where either :
+	//¡ªthe first argument of a constructor has type allocator_arg_t and the second argument has type Alloc or
+//		¡ªthe last argument of a constructor has type Alloc.
+//
+
 
 	namespace Internal
 	{
@@ -20,9 +37,11 @@ namespace Yupei
 		template<typename Type,
 			typename Alloc
 		>
-		struct UsesAllocatorHelper<Type,Alloc,Yupei::void_t<typename Type::allocator_type>>
+		struct UsesAllocatorHelper<Type,Alloc,
+			Yupei::void_t<container_allocator_type<Type>>>
 			: bool_constant<
-			is_convertible<typename Type::allocator_type,Alloc>::value>
+			is_convertible<container_allocator_type<Type>,Alloc>::value |
+			is_same<container_allocator_type<Type>,Experimental::erased_type>::value>
 		{
 
 		};

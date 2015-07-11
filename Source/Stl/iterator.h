@@ -342,11 +342,136 @@ namespace Yupei
 	struct bidirectional_iterator_tag : public forward_iterator_tag { };
 	struct random_access_iterator_tag : public bidirectional_iterator_tag { };
 
+	namespace Internal
+	{
+		template<typename Iterator,
+			typename = void>
+		struct value_type
+		{
+			using type = remove_reference_t<decltype(*declval<Iterator>())>; // no value_type
+		};
+
+		template<typename Iterator>
+		struct value_type<Iterator,
+			void_t<typename Iterator::value_type>
+		>
+		{
+			using type = typename Iterator::value_type; //I have a value_type
+		};
+	}
+
+	template<typename Iterator>
+	using ValueType = typename Internal::value_type<Iterator>::type;
 
 	namespace Internal
 	{
-		
+		template<typename Iterator,
+			typename = void>
+		struct reference_type
+		{
+			using type = decltype(*declval<Iterator>()); // no reference, use operator*
+		};
 
+		template<typename Iterator>
+		struct reference_type<Iterator,
+			void_t<typename Iterator::value_type>
+		>
+		{
+			using type = typename Iterator::reference; //I have a value_type
+		};
+	}
+
+	template<typename Iterator>
+	using ReferenceType = typename Internal::reference_type<Iterator>::type;
+
+	namespace Internal
+	{
+		template <class, class = void> 
+		struct difference_type { };
+		template <class T> 
+		struct difference_type<T*>
+		{
+			using type = ptrdiff_t;
+		};
+		template <>
+		struct difference_type<nullptr_t>
+		{
+			using type = ptrdiff_t;
+		};
+		template <class T>
+		struct difference_type<T[]>
+		{
+			using type = ptrdiff_t;
+		};
+		template <class T, std::size_t N>
+		struct difference_type<T[N]>
+		{
+			using type = ptrdiff_t;
+		};
+		template <class T>
+		struct difference_type<T, void_t<typename T::difference_type>>
+		{
+			using type = typename T::difference_type;
+		};
+		/*[Editor¡¯s note : REVIEW : The difference_type of unsigned Integral types
+		is not large enough to cover
+		the entire range.*/
+		//yupei's note:why do we need this.......
+		/*template <class T>
+		struct difference_type<T, enable_if_t<is_integral<T>::value>>
+		: make_signed< decltype(declval<T>() - declval<T>()) >
+		{
+		};*/
+	}
+
+	template<typename Iterator>
+	using DifferenceType = typename Internal::difference_type<Iterator>::type;
+
+	namespace Internal
+	{
+		template <class, class = void> struct iterator_category { };
+		template <class T> struct iterator_category<T*> 
+		{
+			using type = random_access_iterator_tag;
+		};
+		template <class T>
+		struct iterator_category<T, 
+			void_t<typename T::iterator_category>
+		> 
+		{
+			using type = typename T::iterator_category;
+		};
+
+	}
+
+	template <class T>
+	using IteratorCategory = typename Internal::iterator_category<T>::type;
+
+	namespace Internal
+	{
+		template <class I, class = void> 
+		struct pointer_type_impl
+		{
+			using type = add_pointer_t<ReferenceType<I>>;
+		};
+
+		
+		template <class I>
+		struct pointer_type_impl<I, 
+			void_t</*decltype(Yupei::declval<I>().operator->())*/typename I::pointer>
+		>
+		{
+			using type = typename I::pointer;
+		};
+
+	}
+
+	template <class T>
+	using PointerType = typename Internal::pointer_type_impl<T>::type;
+	
+
+	namespace Internal
+	{
 		template<
 			typename Iterator,
 			bool IsIterator>
@@ -357,11 +482,11 @@ namespace Yupei
 		>
 		struct iterator_traits_impl<Iterator, true>
 		{
-			using difference_type = typename Iterator::difference_type;
-			using value_type = typename Iterator::value_type;
-			using pointer = typename Iterator::pointer;
-			using reference = typename Iterator::value_type;
-			using iterator_category = typename Iterator::value_type;
+			using difference_type = DifferenceType<Iterator>;
+			using value_type = ValueType<Iterator>;
+			using pointer = PointerType<Iterator>;
+			using reference = ReferenceType<Iterator>;
+			using iterator_category = IteratorCategory<Iterator>;
 		};
 
 		template<
@@ -373,62 +498,21 @@ namespace Yupei
 
 		};
 
-		template<
-			typename Iterator,
-			typename = void_t<
-			typename Iterator::value_type,
-			typename Iterator::difference_type,
-			typename Iterator::reference,
-			typename Iterator::pointer,
-			typename Iterator::iterator_category
-			>>
-		struct is_iterator : true_type
+		template<typename Iterator>
+		struct is_iterator<Iterator, 
+			void_t<
+			//ValueType<Iterator>,// a value_type, a workaround
+			IteratorCategory<Iterator> // a iterator category
+			>
+		> : true_type
 		{
 
 		};
 	}
 
 	template<class Iterator> 
-	struct iterator_traits : Internal::iterator_traits_impl<Iterator,
-		Internal::is_iterator<Iterator>::value>
-	{
-
-	};
-
-	template<class T> 
-	struct iterator_traits<T*> 
-	{
-		typedef std::ptrdiff_t difference_type;
-		typedef T value_type;
-		typedef T* pointer;
-		typedef T& reference;
-		typedef random_access_iterator_tag iterator_category;
-	};
-
-	template<class T> 
-	struct iterator_traits<const T*> 
-	{
-		typedef std::ptrdiff_t difference_type;
-		typedef T value_type;
-		typedef const T* pointer;
-		typedef const T& reference;
-		typedef random_access_iterator_tag iterator_category;
-	};
-
-	template<typename Iterator>
-	using value_t = typename iterator_traits<Iterator>::value_type;
-
-	template<typename Iterator>
-	using difference_t = typename iterator_traits<Iterator>::difference_type;
-
-	template<typename Iterator>
-	using pointer_t = typename iterator_traits<Iterator>::pointer;
-
-	template<typename Iterator>
-	using reference_t = typename iterator_traits<Iterator>::reference_type;
-
-	template<typename Iterator>
-	using iterator_category_t = typename iterator_traits<Iterator>::iterator_category;
+	using iterator_traits = Internal::iterator_traits_impl<Iterator,
+		Internal::is_iterator<Iterator>::value>;
 
 	template<class Category, class T, class Distance = std::ptrdiff_t,
 	class Pointer = T*, class Reference = T&>
@@ -487,36 +571,36 @@ namespace Yupei
 	namespace Internal
 	{
 		template <class InputIterator>
-		difference_t<InputIterator> distance_impl(InputIterator first, InputIterator last, input_iterator_tag)
+		DifferenceType<InputIterator> distance_impl(InputIterator first, InputIterator last, input_iterator_tag)
 		{
-			difference_t<InputIterator> res{};
+			DifferenceType<Iterator> res{};
 			for (;first != last;++first)
 				++res;
 			return res;
 		}
 
 		template <class InputIterator>
-		difference_t<InputIterator> distance_impl(InputIterator first, InputIterator last, random_access_iterator_tag)
+		DifferenceType<InputIterator> distance_impl(InputIterator first, InputIterator last, random_access_iterator_tag)
 		{
 			return last - first;
 		}
 	}
 	
 	template <class InputIterator>
-	difference_t<InputIterator> distance(InputIterator first, InputIterator last)
+	DifferenceType<InputIterator> distance(InputIterator first, InputIterator last)
 	{
 		return Internal::distance_impl(first, last, iterator_category_t<InputIterator>{});
 	}
 	template <class ForwardIterator>
 	ForwardIterator next(ForwardIterator x,
-		difference_t<ForwardIterator> n = 1)
+		DifferenceType<ForwardIterator> n = 1)
 	{
 		Yupei::advance(x, n);
 		return x;
 	}
 	 template <class BidirectionalIterator>
 	 BidirectionalIterator prev(BidirectionalIterator x,
-		 difference_t<BidirectionalIterator> n = 1)
+		 DifferenceType<BidirectionalIterator> n = 1)
 	 {
 		 Yupei::advance(x, -n);
 		 return x;
@@ -527,11 +611,11 @@ namespace Yupei
 	 {
 	 public:
 		 using iterator_type = Iterator;
-		 using iterator_category = iterator_category_t<Iterator>;
-		 using value_type = value_t<Iterator>;
-		 using difference_type = difference_t<Iterator>;
-		 using pointer = pointer_t<Iterator>;
-		 using reference = reference_t<Iterator>;
+		 using iterator_category = IteratorCategory<Iterator>;
+		 using value_type = ValueType<Iterator>;
+		 using difference_type = DifferenceType<Iterator>;
+		 using pointer = PointerType<Iterator>;
+		 using reference = ReferenceType<Iterator>;
 		 reverse_iterator()
 			 :current()
 		 {
@@ -660,7 +744,7 @@ namespace Yupei
 	 }
 	 template <class Iterator>
 	 reverse_iterator<Iterator> operator+(
-		 difference_t<Iterator> n,
+		 DifferenceType<Iterator> n,
 		 const reverse_iterator<Iterator>& x)
 	 {
 		 return reverse_iterator<Iterator>(x.current - n);
@@ -693,7 +777,7 @@ namespace Yupei
 			 container->push_back(value);
 			 return *this;
 		 }
-		 back_insert_iterator& operator=(value_t<Container>&& value)
+		 back_insert_iterator& operator=(container_value_type<Container>&& value)
 		 {
 			 container->push_back(Yupei::move(value));
 			 return *this;
@@ -761,12 +845,12 @@ namespace Yupei
 		 Container* container;
 		 typename Container::iterator iter;
 	 public:
-		 typedef output_iterator_tag iterator_category;
-		 typedef void value_type;
-		 typedef void difference_type;
-		 typedef void pointer;
-		 typedef void reference;
-		 typedef Container container_type;
+		 using iterator_category = output_iterator_tag;
+		 using value_type = void;
+		 using difference_type = void;
+		 using pointer = void;
+		 using reference = void;
+		 using container_type = Container;
 		 insert_iterator(Container& x, container_iterator<Container> i)
 			 :container(Yupei::addressof(x)),
 			 iter(i)
@@ -804,28 +888,15 @@ namespace Yupei
 		 return insert_iterator<Container>(x, i);
 	 }
 
-	 namespace Internal
-	 {
-		 template<typename Iterator>
-		 struct move_iterator_reference_traits
-		 {
-			 using ref_type = reference_t<Iterator>;
-			 using type = Yupei::conditional_t < 
-				 is_reference<ref_type>::value,
-				 remove_reference_t<ref_type>&&,
-				 ref_type> ;
-		 };
-	 }
-
 	 template <class Iterator>
 	 class move_iterator {
 	 public:
-		 typedef Iterator iterator_type;
-		 typedef typename iterator_traits<Iterator>::difference_type difference_type;
-		 typedef Iterator pointer;
-		 typedef typename iterator_traits<Iterator>::value_type value_type;
-		 typedef typename iterator_traits<Iterator>::iterator_category iterator_category;
-		 using reference = typename Internal::move_iterator_reference_traits<Iterator>::type;
+		 using iterator_type = Iterator;
+		 using difference_type = DifferenceType<Iterator>;
+		 using value_type = ValueType<Iterator>;
+		 using iterator_category = IteratorCategory<Iterator>;
+		 using reference = ValueType<Iterator>&&;
+
 		 move_iterator()
 			 :current()
 		 {
