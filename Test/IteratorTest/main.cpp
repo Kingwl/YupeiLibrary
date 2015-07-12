@@ -12,6 +12,7 @@ int main()
 	Yupei::iterator_traits<std::vector<int>::iterator>::reference ri = i;
 	//Yupei::iterator_traits<Yupei::ostream_iterator<int>>::pointer i;
 	ri = 4;
+	//Yupei::po
 	//Yupei::declval<std::unique_ptr<int>>().operator->();
 	return 0;
 }

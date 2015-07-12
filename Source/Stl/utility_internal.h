@@ -98,6 +98,26 @@ namespace Yupei
 	template<typename Type>
 	using get_const_reference_t = typename get_const_reference<Type>::type;
 
+	template<typename Type,
+		typename = void>
+	struct get_difference_type
+	{
+		using type = std::ptrdiff_t;
+	};
+
+	template<typename Type>
+	struct get_difference_type<Type,
+		void_t<container_difference_type<Type>>
+	>
+	{
+		using type = container_difference_type<Type>;
+	};
+
+	template<typename Type>
+	using get_difference_type_t = typename get_difference_type<Type>::type;
+
+
+	
 	template<typename ValueType>
 	struct container_utility
 	{
