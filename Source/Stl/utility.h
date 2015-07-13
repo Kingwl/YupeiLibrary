@@ -174,7 +174,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 			is_copy_constructible<first_type>::value 
 			&& is_copy_constructible<second_type>::value>>
 		constexpr pair(const T1& x, const T2& y)
-			:first{x},second{y}
+			:first(x),second(y)
 		{
 
 		}
