@@ -21,5 +21,6 @@ int main()
 	std::cout << typeid(Yupei::allocator_traits<SimpleAllocator<int>>::pointer{}).name() << std::endl;;
 	std::cout << typeid(Yupei::allocator_traits<SimpleAllocator<int>>::const_pointer{}).name() << std::endl;
 	std::system("pause");
+	//std::set_new_handler
 	return 0;
 }

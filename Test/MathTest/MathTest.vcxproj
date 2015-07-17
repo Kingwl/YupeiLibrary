@@ -11,25 +11,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7C7BE4F3-E155-4FD0-A1B0-CB8BC94C22BC}</ProjectGuid>
-    <RootNamespace>YupeiLibrary</RootNamespace>
+    <ProjectGuid>{A104AFC2-4990-4D02-9555-589A95ED843A}</ProjectGuid>
+    <RootNamespace>MathTest</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -38,9 +40,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetExt>.lib</TargetExt>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -66,36 +66,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Custom\StopWatch.h" />
-    <ClInclude Include="Stl\algorithm.h" />
-    <ClInclude Include="Stl\algo_internal.h" />
-    <ClInclude Include="Stl\Auto.h" />
-    <ClInclude Include="Stl\basic.h" />
-    <ClInclude Include="Stl\binary_search_tree.h" />
-    <ClInclude Include="Stl\container_traits.h" />
-    <ClInclude Include="Stl\def_internal.h" />
-    <ClInclude Include="Stl\functional.h" />
-    <ClInclude Include="Stl\iterator.h" />
-    <ClInclude Include="Stl\math.h" />
-    <ClInclude Include="Stl\memory.h" />
-    <ClInclude Include="Stl\memory_resource.h" />
-    <ClInclude Include="Stl\traits_constant.h" />
-    <ClInclude Include="Stl\traits_internal.h" />
-    <ClInclude Include="Stl\tuple.h" />
-    <ClInclude Include="Stl\type_traits.h" />
-    <ClInclude Include="Stl\utility.h" />
-    <ClInclude Include="Stl\utility_internal.h" />
-    <ClInclude Include="Stl\__addressof.h" />
-    <ClInclude Include="Stl\__allocator.h" />
-    <ClInclude Include="Stl\__is_mem_func_obj.h" />
-    <ClInclude Include="Stl\__reference_wrapper.h" />
-    <ClInclude Include="Stl\__swap.h" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Stl\memory_resource.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\README.md" />
+    <ProjectReference Include="..\..\Source\YupeiLibrary.vcxproj">
+      <Project>{7c7be4f3-e155-4fd0-a1b0-cb8bc94c22bc}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

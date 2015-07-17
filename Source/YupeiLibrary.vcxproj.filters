@@ -4,163 +4,93 @@
     <Filter Include="Stl">
       <UniqueIdentifier>{d14920e4-2aec-45fb-8ee4-d1c777a059b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Gui">
-      <UniqueIdentifier>{a93bc754-9705-48a4-9fdd-da898399e127}</UniqueIdentifier>
+    <Filter Include="Stl\Headers">
+      <UniqueIdentifier>{c6b96316-f901-470e-acc8-4e14ff9d48a7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Gui\Headers">
-      <UniqueIdentifier>{8cedf358-3e46-4e9b-ad10-cb7ffd3638f5}</UniqueIdentifier>
+    <Filter Include="Stl\Sources">
+      <UniqueIdentifier>{bd998dd1-ce71-4bd1-a771-de666fa1cedc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Gui\Sources">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    <Filter Include="Custom">
+      <UniqueIdentifier>{0afc5423-d5c4-4343-9238-797cdaae876a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Stl\algorithm.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\basic.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\def_internal.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\functional.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\memory.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\traits_internal.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\tuple.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\type_traits.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\utility.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Animation.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Application.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Brush.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Common.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Control.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\EventArgs.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\EventHandler.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Font.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Graphics.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\GraphicsBasis.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\NativeWindows.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Observers.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Panel.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Shapes.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\SystemHelper.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\UIElement.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\Visual.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Gui\WindowBase.h">
-      <Filter>Gui\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\binary_search_tree.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\utility_internal.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\__is_mem_func_obj.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\traits_constant.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\algo_internal.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\__swap.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
     <ClInclude Include="Stl\__allocator.h">
-      <Filter>Stl</Filter>
-    </ClInclude>
-    <ClInclude Include="Stl\__reference_wrapper.h">
-      <Filter>Stl</Filter>
+      <Filter>Stl\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Stl\__addressof.h">
-      <Filter>Stl</Filter>
+      <Filter>Stl\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Stl\iterator.h">
-      <Filter>Stl</Filter>
+    <ClInclude Include="Stl\__is_mem_func_obj.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\__reference_wrapper.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\__swap.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\algo_internal.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\algorithm.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\basic.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\binary_search_tree.h">
+      <Filter>Stl\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Stl\container_traits.h">
-      <Filter>Stl</Filter>
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\def_internal.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\iterator.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\functional.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\memory.h">
+      <Filter>Stl\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Stl\memory_resource.h">
-      <Filter>Stl</Filter>
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\traits_constant.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\traits_internal.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\tuple.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\type_traits.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\utility.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\utility_internal.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\math.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\Auto.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Custom\StopWatch.h">
+      <Filter>Custom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Gui\Application.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\Brush.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\Graphics.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\GraphicsBasis.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\NativeWindows.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\Shapes.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\UIElement.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\WindowBase.cpp">
-      <Filter>Gui\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Gui\Panel.cpp">
-      <Filter>Gui\Sources</Filter>
+    <ClCompile Include="Stl\memory_resource.cpp">
+      <Filter>Stl\Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

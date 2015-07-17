@@ -46,7 +46,7 @@ namespace Yupei
 
 		template<typename Iterator>
 		struct reference_type<Iterator,
-			void_t<typename Iterator::value_type>
+			void_t<typename Iterator::reference>
 		>
 		{
 			using type = typename Iterator::reference; //I have a value_type
