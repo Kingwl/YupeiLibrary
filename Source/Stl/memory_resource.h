@@ -201,8 +201,8 @@ namespace Yupei
 				}
 				char* allocate(size_type sz) const noexcept
 				{
-					assert(sz < AvaliableSize());
-					auto res = begin() + GetChunkTotalSize() - AvaliableSize();
+					assert(sz <= AvaliableSize());
+					auto res = begin() + ContentSize() - AvaliableSize();
 					AvaliableSize() -= sz;
 					return res;
 				}
@@ -337,8 +337,9 @@ namespace Yupei
 					BlockPtr ptr = GetCurrentBufferBlockPtr();
 					while (!ptr.empty())
 					{
-						upstream_rsrc->deallocate(static_cast<void*>(ptr.Head()), ptr.GetChunkTotalSize());
-						ptr = ptr.GetNextBlock();
+						auto temp = ptr.GetNextBlock();
+						upstream_rsrc->deallocate(ptr.Head(), ptr.GetChunkTotalSize());
+						ptr = temp;
 					}
 					
 				}
@@ -350,27 +351,24 @@ namespace Yupei
 			protected:
 				virtual void* do_allocate(size_t bytes, size_t alignment) override
 				{
+					if (bytes > MaxBlockSize)
+					{
+						return upstream_rsrc->allocate(bytes, alignment);
+					}
 					Auto(UpdateNextSize());
 					auto realBytes = RoundUp(bytes, alignment);
-					if (current_buffer == nullptr)
-					{
-						current_buffer = AllocateNewBlock(realBytes);
-						BlockPtr ptr = GetCurrentBufferBlockPtr();
-						ptr.NextBlockPtr() = nullptr;
-						return ptr.allocate(realBytes);
-					}
-					else
+					auto newBlockSize = RoundUp(bytes, LeastStartSize);
 					{
 						auto cur = GetCurrentBufferBlockPtr();
 						for (;
-						!cur.empty() && cur.AvaliableSize() >= realBytes;
+						!cur.empty() && cur.AvaliableSize() < realBytes;
 							cur = cur.GetNextBlock())
 						{
 							;
 						}
 						if (cur.empty())
 						{
-							AddNewBlock(AllocateNewBlock(realBytes));
+							AddNewBlock(AllocateNewBlock(newBlockSize));
 							return GetCurrentBufferBlockPtr().allocate(realBytes);
 						}
 						else
@@ -383,6 +381,10 @@ namespace Yupei
 					size_t alignment)
 				{
 					//Standard tells us no-op?
+					if (bytes > MaxBlockSize)
+					{
+						return upstream_rsrc->deallocate(p,bytes, alignment);
+					}
 				}
 
 				virtual bool do_is_equal(const memory_resource& other) const noexcept
@@ -410,7 +412,12 @@ namespace Yupei
 					}
 					void* AllocateNewBlock(size_t origSz)
 					{
-						return upstream_rsrc->allocate(BlockPtr::GetSizeToAllocate(origSz));
+						auto ptr = BlockPtr{ static_cast<char*>(
+							upstream_rsrc->allocate(
+								BlockPtr::GetSizeToAllocate(origSz))) };
+						ptr.ContentSize() = ptr.AvaliableSize() = origSz;
+						ptr.NextBlockPtr() = nullptr;
+						return ptr.Head();
 					}
 			};
 
@@ -599,7 +606,8 @@ namespace Yupei
 				unsynchronized_pool_resource(const pool_options& opts, memory_resource* upstream)
 					:memory_resource(),
 					upstream_src(upstream),
-					freeLists(nullptr)
+					freeLists(nullptr),
+					freeListSource(new monotonic_buffer_resource())
 				{
 					size_t freeListCount, largestPool = opts.largest_required_pool_block;
 					//correct the largest_required_pool_block
@@ -619,7 +627,7 @@ namespace Yupei
 					for (size_t i = 0;i < freeListCount;++i)
 					{
 						chunkSize += 8;
-						new (ptr) FreeList(chunkSize, opts.max_blocks_per_chunk);
+						new (ptr) FreeList(freeListSource, chunkSize, opts.max_blocks_per_chunk);
 						++ptr;
 					}
 					poolOptions.largest_required_pool_block = largestPool;
@@ -651,7 +659,13 @@ namespace Yupei
 
 				void release()
 				{
-					delete freeLists;
+					size_t count = poolOptions.largest_required_pool_block / 8;
+					for (size_t i = 0;i < count;++i)
+					{
+						freeLists[i].~FreeList();
+					}
+					::operator delete(freeLists);
+					delete freeListSource;
 				}
 				memory_resource* upstream_resource() const
 				{
@@ -697,6 +711,7 @@ namespace Yupei
 				FreeList* freeLists;
 				memory_resource* upstream_src;
 				pool_options poolOptions;
+				monotonic_buffer_resource* freeListSource;
 
 				static size_t GetFreeListIndex(size_t sz) noexcept
 				{
