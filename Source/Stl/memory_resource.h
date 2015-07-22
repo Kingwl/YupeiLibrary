@@ -175,6 +175,10 @@ namespace Yupei
 					return ptr + (sizeof(size_type) << 1)
 						+ StaticGetLcm(sizeof(size_type), sizeof(void*));
 				}
+				char* end() const noexcept
+				{
+					return begin() + ContentSize();
+				}
 				size_type* GetContentSizePtr() const noexcept
 				{
 					return reinterpret_cast<size_type*>(ptr);
@@ -206,6 +210,11 @@ namespace Yupei
 					AvaliableSize() -= sz;
 					return res;
 				}
+				void deallocate(size_type sz) const noexcept
+				{
+					assert(sz <= ContentSize() - AvaliableSize());
+					AvaliableSize() += sz;
+				}
 				bool empty() const noexcept
 				{
 					return ptr == nullptr;
@@ -221,10 +230,15 @@ namespace Yupei
 				//Warning!!The total size is content+overhead
 				void SetArgs(
 					size_type totalsz,
-					char* _next = nullptr)
+					char* _next = nullptr) noexcept
 				{
 					ContentSize() = AvaliableSize() = totalsz - GetOverheadSize();
 					NextBlockPtr() = _next;
+				}
+				bool IsContain(void* p) const noexcept
+				{
+					auto cp = static_cast<char*>(p);
+					return (cp >= begin() && cp < end());
 				}
 				bool HasNext() const noexcept
 				{
@@ -257,9 +271,8 @@ namespace Yupei
 				memory_resource* upstream_rsrc; // exposition only
 				void* current_buffer; // exposition only
 				size_t next_buffer_size; // exposition only
-				static constexpr size_t LeastStartSize = 1024;//1KB
+				static constexpr size_t LeastStartSize = 256;//0.25KB
 				static constexpr size_t MaxBlockSize = 1024 * 1024;//1MB
-				
 				void CorrectInitialSize() noexcept
 				{
 					next_buffer_size = RoundUp(next_buffer_size,LeastStartSize);
@@ -355,27 +368,19 @@ namespace Yupei
 					{
 						return upstream_rsrc->allocate(bytes, alignment);
 					}
-					Auto(UpdateNextSize());
 					auto realBytes = RoundUp(bytes, alignment);
-					auto newBlockSize = RoundUp(bytes, LeastStartSize);
+					BlockPtr cur = GetCurrentBufferBlockPtr();
+					if (cur.empty() || cur.AvaliableSize() < realBytes)
 					{
-						auto cur = GetCurrentBufferBlockPtr();
-						for (;
-						!cur.empty() && cur.AvaliableSize() < realBytes;
-							cur = cur.GetNextBlock())
-						{
-							;
-						}
-						if (cur.empty())
-						{
-							AddNewBlock(AllocateNewBlock(newBlockSize));
-							return GetCurrentBufferBlockPtr().allocate(realBytes);
-						}
-						else
-						{
-							return cur.allocate(realBytes);
-						}
+						Auto(UpdateNextSize());
+						AddNewBlock(AllocateNewBlock(realBytes));
+						return GetCurrentBufferBlockPtr().allocate(realBytes);
 					}
+					else
+					{
+						return cur.allocate(realBytes);
+					}
+					
 				}
 				virtual void do_deallocate(void* p, size_t bytes,
 					size_t alignment)
@@ -384,6 +389,10 @@ namespace Yupei
 					if (bytes > MaxBlockSize)
 					{
 						return upstream_rsrc->deallocate(p,bytes, alignment);
+					}
+					else
+					{
+						//no-op
 					}
 				}
 
@@ -403,15 +412,16 @@ namespace Yupei
 					{
 						return BlockPtr{ static_cast<char*>(current_buffer) };
 					}
-					void AddNewBlock(void* newBlock)
+					void AddNewBlock(void* newBlock) noexcept
 					{
 						auto head = GetCurrentBufferBlockPtr();
 						BlockPtr ptr{ static_cast<char*>(newBlock) };
-						ptr.NextBlockPtr() = static_cast<char*>(current_buffer);
+						ptr.NextBlockPtr() = static_cast<char*>(head.Head());
 						current_buffer = ptr.Head();
 					}
-					void* AllocateNewBlock(size_t origSz)
+					void* AllocateNewBlock(size_t origSz) const
 					{
+						origSz = origSz > next_buffer_size ? origSz : next_buffer_size;
 						auto ptr = BlockPtr{ static_cast<char*>(
 							upstream_rsrc->allocate(
 								BlockPtr::GetSizeToAllocate(origSz))) };
@@ -425,7 +435,7 @@ namespace Yupei
 			{
 			public:
 				using size_type = std::size_t;
-				static constexpr size_type MaxChunksCount = 1024;
+				static constexpr size_type MaxChunksCount = 64;
 				FreeList(memory_resource* _upstream,
 					size_type _chunkSize,
 					size_type _maxChunkCount)
@@ -446,6 +456,7 @@ namespace Yupei
 				//pre-condition:chunksList == nullptr
 				void* ReFillChunks()
 				{
+					assert(chunksList == nullptr);
 					auto totalRequestSize = GetRquiredSize();
 					auto rawMemory = static_cast<char*>(upstream->allocate(totalRequestSize));
 					//the last chunk needs to be return to client
@@ -474,7 +485,6 @@ namespace Yupei
 					{
 						void* res = static_cast<void*>(chunksList);
 						chunksList = chunksList->next_chunk;
-						UpdateRequestSize();
 						return res;
 					}
 				}
@@ -536,9 +546,9 @@ namespace Yupei
 
 				memory_resource* upstream;
 				chunk_block* chunksList = nullptr;
-				size_type requestChunksCount = 1;
+				size_type requestChunksCount = 2;
 				size_type maxChunksCount;
-				size_type chunkSize; //my size
+				const size_type chunkSize; //my size
 			};
 
 
@@ -613,13 +623,12 @@ namespace Yupei
 					//correct the largest_required_pool_block
 					if (largestPool == 0)
 					{
-						largestPool = 512;//0.5KB
+						largestPool = 128;//0.5KB
 					}
 					freeListCount = largestPool / 8;
 
 
 					freeLists = static_cast<FreeList*>(
-						upstream,
 						::operator new(sizeof(FreeList) * freeListCount));
 					
 					auto ptr = freeLists;
