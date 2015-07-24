@@ -1,7 +1,10 @@
 #pragma once
 
 #include "utility.h"
+#include "__allocator.h"
+#include "iterator.h"
 #include <numeric>
+#include <cinttypes>
 
 namespace Yupei
 {
@@ -361,9 +364,15 @@ namespace Yupei
 		using propagate_on_container_move_assignment = typename propagate_on_container_move_assignment_traits<allocator_type>::type;
 		using propagate_on_container_swap = typename propagate_on_container_swap_traits<allocator_type>::type;
 		template<class T>
-		using rebind_alloc = typename get_rebind<allocator_type, T>::type;
+		struct rebind_alloc
+		{
+			using other = typename get_rebind<allocator_type, T>::type;
+		};
 		template <class T> 
-		using rebind_traits = allocator_traits<rebind_alloc<T> >;
+		struct rebind_traits
+		{
+			using other = allocator_traits<typename rebind_alloc<T>::other >;
+		};
 	
 		static pointer allocate(Alloc& a, size_type n)
 		{
@@ -399,6 +408,164 @@ namespace Yupei
 	
 	};
 
+	//Effects: If it is possible to fit size bytes of storage aligned by alignment into the buffer pointed to by
+	//ptr with length space, the function updates ptr to point to the first possible address of such storage
+	//and decreases space by the number of bytes used for alignment.Otherwise, the function does nothing.
+	inline void* align(std::size_t alignment, std::size_t size,
+		void*& ptr, std::size_t& space)
+	{
+		std::size_t offset = static_cast<std::size_t>(reinterpret_cast<std::uintptr_t>(ptr) & (alignment - 1));
+		if (offset > 0) offset = alignment - offset;
+		if (offset > space || space - offset > size) return nullptr;
+		else
+		{
+			ptr = static_cast<char*>(ptr) - static_cast<std::ptrdiff_t>(offset);
+			space -= offset;
+			return ptr;
+		}
+	}
+
+	template <class T> class allocator;
+	// specialize for void:
+	template <> class allocator<void> {
+	public:
+		typedef void* pointer;
+		typedef const void* const_pointer;
+		// reference-to-void members are impossible.
+		typedef void value_type;
+		template <class U> struct rebind { typedef allocator<U> other; };
+	};
+	template <class T> class allocator {
+	public:
+		typedef size_t size_type;
+		typedef ptrdiff_t difference_type;
+		typedef T* pointer;
+		typedef const T* const_pointer;
+		typedef T& reference;
+		typedef const T& const_reference;
+		typedef T value_type;
+		template <class U> struct rebind { typedef allocator<U> other; };
+		typedef true_type propagate_on_container_move_assignment;
+		typedef true_type is_always_equal;
+		allocator() noexcept = default;
+		allocator(const allocator&) noexcept = default;
+		template <class U> allocator(const allocator<U>&) noexcept = default;
+		~allocator() = default;
+		pointer address(reference x) const noexcept
+		{
+			return Yupei::addressof(x);
+		}
+		const_pointer address(const_reference x) const noexcept
+		{
+			return Yupei::addressof(x);
+		}
+		pointer allocate(
+			size_type sz, allocator<void>::const_pointer hint = 0)
+		{
+			return ::operator new(sz * sizeof(value_type));
+		}
+		void deallocate(pointer p, size_type n)
+		{
+			return ::operator delete(p, n);
+		}
+		size_type max_size() const noexcept
+		{
+			return static_cast<size_type>(-1) / sizeof(value_type);
+		}
+		//template<class U, class... Args>
+		//void construct(U* p, Args&&... args);
+		//template <class U>
+		//void destroy(U* p);
+	};
+
+	template <class T1, class T2>
+	bool operator==(const allocator<T1>&, const allocator<T2>&) noexcept
+	{
+		return true;
+	}
+	template <class T1, class T2>
+	bool operator!=(const allocator<T1>&, const allocator<T2>&) noexcept
+	{
+		return false;
+	}
+	template <class OutputIterator, class T>
+	class raw_storage_iterator {
+	public:
+		typedef output_iterator_tag iterator_category;
+		typedef void value_type;
+		typedef void difference_type;
+		typedef void pointer;
+		typedef void reference;
+		explicit raw_storage_iterator(OutputIterator x)
+			:iter(x)
+		{
+
+		}
+		raw_storage_iterator& operator*() 
+		{
+			return *this;
+		}
+		raw_storage_iterator& operator=(const T& element)
+		{
+			new (static_cast<void*>(&*iter)) T(element)
+		}
+		raw_storage_iterator& operator++()
+		{
+			++iter;
+			return *this;
+		}
+		raw_storage_iterator operator++(int)
+		{
+			auto temp = iter;
+			++iter;
+			return temp;
+		}
+		OutputIterator base() const
+		{
+			return iter;
+		}
+	private:
+		OutputIterator iter;
+	};
+	//no get_temporary_buffer/return support
+	
+	template <class InputIterator, class ForwardIterator>
+	ForwardIterator uninitialized_copy(InputIterator first, InputIterator last,
+		ForwardIterator result)
+	{
+		for (; first != last; ++result, ++first)
+			::new (static_cast<void*>(addressof(*result)))
+			typename iterator_traits<ForwardIterator>::value_type(*first);
+		return result;
+	}
+	template <class InputIterator, class Size, class ForwardIterator>
+	ForwardIterator uninitialized_copy_n(InputIterator first, Size n,
+		ForwardIterator result)
+	{
+		for (; n > 0; ++result, ++first, --n) {
+			::new (static_cast<void*>(addressof(*result)))
+				typename iterator_traits<ForwardIterator>::value_type(*first);
+		}
+		return result;
+	}
+
+	template <class ForwardIterator, class T>
+	void uninitialized_fill(ForwardIterator first, ForwardIterator last,
+		const T& x)
+	{
+		for (; first != last; ++first)
+			::new (static_cast<void*>(addressof(*first)))
+			typename iterator_traits<ForwardIterator>::value_type(x);
+	}
+
+	template <class ForwardIterator, class Size, class T>
+	ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const T& x)
+	{
+		for (; n--; ++first)
+			::new (static_cast<void*>(addressof(*first)))
+			typename iterator_traits<ForwardIterator>::value_type(x);
+		return first;
+	}
 	
 	template<typename PointerType,typename DeleterType>
 	class unique_ptr;

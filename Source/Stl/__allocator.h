@@ -40,7 +40,7 @@ namespace Yupei
 		struct UsesAllocatorHelper<Type,Alloc,
 			Yupei::void_t<container_allocator_type<Type>>>
 			: bool_constant<
-			is_convertible<container_allocator_type<Type>,Alloc>::value |
+			is_convertible<container_allocator_type<Type>,Alloc>::value ||
 			is_same<container_allocator_type<Type>,Experimental::erased_type>::value>
 		{
 
