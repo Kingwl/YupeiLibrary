@@ -45,9 +45,6 @@
     <ClInclude Include="Stl\container_traits.h">
       <Filter>Stl\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Stl\def_internal.h">
-      <Filter>Stl\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Stl\iterator.h">
       <Filter>Stl\Headers</Filter>
     </ClInclude>
@@ -86,6 +83,12 @@
     </ClInclude>
     <ClInclude Include="Custom\StopWatch.h">
       <Filter>Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\algorithm_internal.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\compare_funtor.h">
+      <Filter>Stl\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

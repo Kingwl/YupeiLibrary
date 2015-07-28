@@ -914,21 +914,27 @@ namespace Yupei
 			:Yupei::forward<Type2>(t2)), 
 			static_max(Yupei::forward<Args>(args))...);
 	}
-	
-	////http://en.cppreference.com/w/cpp/types/aligned_union
-	//template <std::size_t Len, typename... Types>
-	//struct aligned_union
-	//{
-	//	static constexpr std::size_t alignment_value = Yupei::static_max( alignof(Types)... );
+	//Provides the member typedef type, which is a POD type of a size and 
+	//alignment suitable for use as uninitialized storage for an object of any 
+	//of the types listed in Types. The size of the storage is at least Len. 
+	//std::aligned_union also determines the strictest (largest) alignment requirement among 
+	//all Types and makes it available as the constant alignment_value. 
+	//
+	//满足Types...中最严格的对齐要求，大小至少为Len。
+	//http://en.cppreference.com/w/cpp/types/aligned_union
+	template <std::size_t Len, typename... Types>
+	struct aligned_union
+	{
+		static constexpr std::size_t alignment_value = Yupei::static_max( alignof(Types)... );
 
-	//	struct type
-	//	{
-	//		alignas(alignment_value) char _s[Yupei::static_max( Len, sizeof(Types)... )];
-	//	};
-	//};
+		struct type
+		{
+			alignas(alignment_value) char _s[Yupei::static_max( Len, sizeof(Types)... )];
+		};
+	};
 
-	//template <std::size_t Len, typename... Types>
-	//using aligned_union_t = typename aligned_union<Len, Types...>::type;
+	template <std::size_t Len, typename... Types>
+	using aligned_union_t = typename aligned_union<Len, Types...>::type;
 #endif
 
 	template<typename Type>

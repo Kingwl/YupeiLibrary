@@ -68,12 +68,13 @@
   <ItemGroup>
     <ClInclude Include="Custom\StopWatch.h" />
     <ClInclude Include="Stl\algorithm.h" />
+    <ClInclude Include="Stl\algorithm_internal.h" />
     <ClInclude Include="Stl\algo_internal.h" />
     <ClInclude Include="Stl\Auto.h" />
     <ClInclude Include="Stl\basic.h" />
     <ClInclude Include="Stl\binary_search_tree.h" />
+    <ClInclude Include="Stl\compare_funtor.h" />
     <ClInclude Include="Stl\container_traits.h" />
-    <ClInclude Include="Stl\def_internal.h" />
     <ClInclude Include="Stl\functional.h" />
     <ClInclude Include="Stl\iterator.h" />
     <ClInclude Include="Stl\math.h" />
