@@ -30,9 +30,6 @@
     <ClInclude Include="Stl\__swap.h">
       <Filter>Stl\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Stl\algo_internal.h">
-      <Filter>Stl\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Stl\algorithm.h">
       <Filter>Stl\Headers</Filter>
     </ClInclude>

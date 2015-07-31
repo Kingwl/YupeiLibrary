@@ -45,8 +45,8 @@ namespace Yupei
 		Yupei::swap_ranges(lhs, lhs + N, rhs);
 	}
 
-	template<typename Type>
+	/*template<typename Type>
 		using is_nothrow_swappable = bool_constant <
-		noexcept(swap(declval<Type&>(), declval<Type&>()))>;
+		noexcept(swap(declval<Type&>(), declval<Type&>()))>;*/
 
 }

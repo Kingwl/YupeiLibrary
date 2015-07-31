@@ -3,7 +3,7 @@
 #include "traits_internal.h"
 #include "utility_internal.h"
 #include "__is_mem_func_obj.h"
-#include "algo_internal.h"
+#include "algorithm_internal.h"
 
 namespace Yupei
 {
@@ -893,50 +893,6 @@ namespace Yupei
 	template<std::size_t Len,
 		std::size_t Align = alignment_of<std::max_align_t>::value>
 		using aligned_storage_t = typename aligned_storage<Len, Align>::type;
-
-
-#if  _MSC_FULL_VER > 190022816 //there is still bug with constexpr with RC
-	//no extended constexpr support
-	//static_max: fuck Visual C++ 2015 RC !
-	template<typename Type>
-	inline constexpr auto static_max(Type&& t)
-	{
-		return t;
-	}
-
-	template<typename Type1,
-		typename Type2,
-		typename... Args>
-	inline constexpr auto static_max(Type1&& t1, Type2&& t2, Args&&... args)
-	{
-		return static_max((t1 > t2 ?
-			Yupei::forward<Type1>(t1)
-			:Yupei::forward<Type2>(t2)), 
-			static_max(Yupei::forward<Args>(args))...);
-	}
-	//Provides the member typedef type, which is a POD type of a size and 
-	//alignment suitable for use as uninitialized storage for an object of any 
-	//of the types listed in Types. The size of the storage is at least Len. 
-	//std::aligned_union also determines the strictest (largest) alignment requirement among 
-	//all Types and makes it available as the constant alignment_value. 
-	//
-	//满足Types...中最严格的对齐要求，大小至少为Len。
-	//http://en.cppreference.com/w/cpp/types/aligned_union
-	template <std::size_t Len, typename... Types>
-	struct aligned_union
-	{
-		static constexpr std::size_t alignment_value = Yupei::static_max( alignof(Types)... );
-
-		struct type
-		{
-			alignas(alignment_value) char _s[Yupei::static_max( Len, sizeof(Types)... )];
-		};
-	};
-
-	template <std::size_t Len, typename... Types>
-	using aligned_union_t = typename aligned_union<Len, Types...>::type;
-#endif
-
 	template<typename Type>
 	struct decay
 	{
@@ -954,12 +910,12 @@ namespace Yupei
 	template<typename Type>
 	using decay_t = typename decay<Type>::type;
 
-	
-	
-	template <typename... Args> 
+
+
+	template <typename... Args>
 	struct common_type;
 
-	template <typename Type> 
+	template <typename Type>
 	struct common_type<Type>
 	{
 		using type = Type;
@@ -972,7 +928,7 @@ namespace Yupei
 	{
 		using type = decay_t<
 			decltype(true ? declval<Type1>() : declval<Type2>())
-			>;
+		>;
 	};
 
 	template<typename Type1,
@@ -987,8 +943,53 @@ namespace Yupei
 			Args...>::type;
 	};
 
+	template<typename... Type>
+	using common_type_t = typename common_type<Type...>::type;
+
+#if  _MSC_FULL_VER > 190022816 //there is still bug with constexpr with RC
+	//no extended constexpr support
+	//static_max: fuck Visual C++ 2015 RC !
 	template<typename Type>
-	using common_type_t = typename common_type<Type>::type;
+	inline constexpr Type static_max(Type t)
+	{
+		return t;
+	}
+
+	template<typename Type1,
+		typename Type2,
+		typename... Args>
+	inline constexpr Yupei::common_type_t<Type1,Type2,Args...> 
+		static_max(Type1 t1, Type2 t2, Args... args)
+	{
+		return static_max((t1 > t2 ?
+			t1
+			:t2), 
+			static_max(args)...);
+	}
+	//Provides the member typedef type, which is a POD type of a size and 
+	//alignment suitable for use as uninitialized storage for an object of any 
+	//of the types listed in Types. The size of the storage is at least Len. 
+	//std::aligned_union also determines the strictest (largest) alignment requirement among 
+	//all Types and makes it available as the constant alignment_value. 
+	//
+	//满足Types...中最严格的对齐要求，大小至少为Len。
+	//http://en.cppreference.com/w/cpp/types/aligned_union
+	template <std::size_t Len, typename... Types>
+	struct aligned_union
+	{
+		static constexpr std::size_t alignment_value = Yupei::static_max( alignof(Types)... );
+
+		struct type
+		{
+			alignas(alignment_value) char _s[Yupei::static_max( Len, alignment_value )];
+		};
+	};
+
+	template <std::size_t Len, typename... Types>
+	using aligned_union_t = typename aligned_union<Len, Types...>::type;
+#endif
+
+	
 
 	template<typename Type>
 	struct underlying_type
