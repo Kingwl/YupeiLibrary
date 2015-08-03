@@ -1,7 +1,8 @@
 #pragma once
 
-#include "utility.h"
+#include "utility_internal.h"
 #include "__allocator.h"
+#include "compress_pair.h"
 #include "iterator.h"
 #include <numeric>
 #include <cinttypes>
@@ -65,7 +66,7 @@ namespace Yupei
 	template<typename Type>
 	struct has_element_type<Type, void_t<typename Type::element_type>> : true_type
 	{
-		
+
 	};
 
 	template<typename Type,
@@ -98,8 +99,8 @@ namespace Yupei
 	{
 		using type = T1;
 	};
-	
-	
+
+
 	template<class Ptr>
 	struct pointer_traits
 	{
@@ -147,7 +148,7 @@ namespace Yupei
 		typename Ptr,
 		typename _Value
 	>
-	struct get_const_pointer<Type,Ptr,_Value,void_t<typename Type::const_pointer>>
+	struct get_const_pointer<Type, Ptr, _Value, void_t<typename Type::const_pointer>>
 	{
 		using type = typename Type::const_pointer;
 	};
@@ -277,9 +278,9 @@ namespace Yupei
 		};
 
 		template<typename Alloc,
-		typename SizeType,
-		typename HintType>
-		static inline auto allocate_impl(Alloc& a, SizeType n, HintType hint, int)
+			typename SizeType,
+			typename HintType>
+			static inline auto allocate_impl(Alloc& a, SizeType n, HintType hint, int)
 			->decltype(a.allocate(n, hint))
 		{
 			return a.allocate(n, hint);
@@ -294,8 +295,8 @@ namespace Yupei
 			return a.allocate(n);
 		}
 
-		template <class Alloc,class T, class... Args>
-		static inline auto construct_impl(int,Alloc& a, T* p, Args&&... args)->decltype(a.construct(a.construct(p,Yupei::forward<Args>(args)...)))
+		template <class Alloc, class T, class... Args>
+		static inline auto construct_impl(int, Alloc& a, T* p, Args&&... args)->decltype(a.construct(a.construct(p, Yupei::forward<Args>(args)...)))
 		{
 			return a.construct(a.construct(p, Yupei::forward<Args>(args)...));
 		}
@@ -306,8 +307,8 @@ namespace Yupei
 			::new (static_cast<void*>(p)) T(Yupei::forward<Args>(args)...);
 		}
 
-		template <class Alloc,class T>
-		static auto destroy_impl(Alloc& a, T* p,int)->decltype(a.destroy(p))
+		template <class Alloc, class T>
+		static auto destroy_impl(Alloc& a, T* p, int)->decltype(a.destroy(p))
 		{
 			return a.destroy(p);
 		}
@@ -319,27 +320,27 @@ namespace Yupei
 		}
 
 		template<class Alloc>
-		static auto max_size_impl(const Alloc& a,int) noexcept 
-			->decltype(a.max_size())	
+		static auto max_size_impl(const Alloc& a, int) noexcept
+			->decltype(a.max_size())
 		{
 			return a.max_size();
 		}
 
-		template<class SizeType,class Alloc>
+		template<class SizeType, class Alloc>
 		static SizeType max_size_impl(const Alloc& a, Internal::WrapInt) noexcept
 		{
 			return std::numeric_limits<SizeType>::max();
 		}
 
 		template<class Alloc>
-		static auto select_on_container_copy_construction_impl(const Alloc& rhs,int )
+		static auto select_on_container_copy_construction_impl(const Alloc& rhs, int)
 			->decltype(rhs.select_on_container_copy_construction())
 		{
 			return rhs.select_on_container_copy_construction();
 		}
 
 		template<class Alloc>
-		static Alloc select_on_container_copy_construction_impl(const Alloc& rhs,Internal::WrapInt)
+		static Alloc select_on_container_copy_construction_impl(const Alloc& rhs, Internal::WrapInt)
 		{
 			return rhs;
 		}
@@ -368,12 +369,12 @@ namespace Yupei
 		{
 			using other = typename get_rebind<allocator_type, T>::type;
 		};
-		template <class T> 
+		template <class T>
 		struct rebind_traits
 		{
 			using other = allocator_traits<typename rebind_alloc<T>::other >;
 		};
-	
+
 		static pointer allocate(Alloc& a, size_type n)
 		{
 			return a.allocate(n);
@@ -399,13 +400,13 @@ namespace Yupei
 		}
 		static size_type max_size(const Alloc& a) noexcept
 		{
-			return Internal::max_size_impl<size_type>(a,0);
+			return Internal::max_size_impl<size_type>(a, 0);
 		}
 		static Alloc select_on_container_copy_construction(const Alloc& rhs)
 		{
 			return Internal::select_on_container_copy_construction_impl(rhs, 0);
 		}
-	
+
 	};
 
 	//Effects: If it is possible to fit size bytes of storage aligned by alignment into the buffer pointed to by
@@ -425,7 +426,8 @@ namespace Yupei
 		}
 	}
 
-	template <class T> class allocator;
+	template <class T>
+	class allocator;
 	// specialize for void:
 	template <> class allocator<void> {
 	public:
@@ -435,7 +437,9 @@ namespace Yupei
 		typedef void value_type;
 		template <class U> struct rebind { typedef allocator<U> other; };
 	};
-	template <class T> class allocator {
+	template <class T>
+	class allocator
+	{
 	public:
 		typedef size_t size_type;
 		typedef ptrdiff_t difference_type;
@@ -462,7 +466,7 @@ namespace Yupei
 		pointer allocate(
 			size_type sz, allocator<void>::const_pointer hint = 0)
 		{
-			return ::operator new(sz * sizeof(value_type));
+			return static_cast<pointer>(::operator new(sz * sizeof(value_type)));
 		}
 		void deallocate(pointer p, size_type n)
 		{
@@ -501,7 +505,7 @@ namespace Yupei
 		{
 
 		}
-		raw_storage_iterator& operator*() 
+		raw_storage_iterator& operator*()
 		{
 			return *this;
 		}
@@ -528,7 +532,7 @@ namespace Yupei
 		OutputIterator iter;
 	};
 	//no get_temporary_buffer/return support
-	
+
 	template <class InputIterator, class ForwardIterator>
 	ForwardIterator uninitialized_copy(InputIterator first, InputIterator last,
 		ForwardIterator result)
@@ -566,7 +570,277 @@ namespace Yupei
 			typename iterator_traits<ForwardIterator>::value_type(x);
 		return first;
 	}
-	
-	template<typename PointerType,typename DeleterType>
-	class unique_ptr;
+
+	template<typename Type>
+	struct default_delete
+	{
+		constexpr default_delete() noexcept = default;
+
+		template<typename UType,
+			typename = enable_if_t <
+			is_convertible<Type*, UType*>{} >>
+			default_delete(const default_delete<UType>&) noexcept = default;
+
+		void operator()(Type* ptr) const noexcept
+		{
+			delete ptr;
+		}
+	};
+
+	template<typename Type>
+	struct default_delete<Type[]>
+	{
+		constexpr default_delete() noexcept = default;
+
+		template<typename UType,
+			typename = enable_if_t <
+			is_convertible<Type(*)[], UType(*)[]>{} >>
+			default_delete(const default_delete<UType>&) noexcept = default;
+
+		template<typename UType,
+			typename = enable_if_t <
+			is_convertible<Type(*)[], UType(*)[]>{} >>
+			void operator()(UType* ptr)
+		{
+			delete[] ptr;
+		}
+
+	};
+
+	namespace Internal
+	{
+		template<typename E, typename D,
+			typename = void>
+		struct GetPtrForUniquePtr
+		{
+			using type = E*;
+		};
+
+		template<typename E,
+			typename D>
+		struct GetPtrForUniquePtr < E, D,
+			Yupei::void_t<typename Yupei::remove_reference_t<D>::pointer >>
+		{
+			using type = typename Yupei::remove_reference_t<D>::pointer;
+		};
+
+		template<typename D>
+		struct SignatureForUniquePtr
+		{
+			using type1 = const D&;
+			using type2 = D&&;
+		};
+
+		template<typename D>
+		struct SignatureForUniquePtr<D&>
+		{
+			using type1 = D&;
+			using type2 = D&&;
+		};
+
+		template<typename D>
+		struct SignatureForUniquePtr<const D&>
+		{
+			using type1 = const D&;
+			using type2 = const D&&;
+		};
+	}
+
+	template<
+		typename T,
+		typename Deleter
+	>
+	struct unique_ptr_base
+	{
+	public:
+		template<typename U>
+		unique_ptr_base(U&& u)
+			:internalData(Yupei::compress_value_initialize_first_arg,
+				Yupei::forward<U>(u))
+		{
+
+		}
+		template<typename U,
+			typename D>
+			unique_ptr_base(U&& u, D&& d)
+			:internalData(Yupei::compress_value_initialize_both_args,
+				Yupei::forward<D>(d),
+				Yupei::forward<U>(u))
+		{
+
+		}
+
+		Deleter& deleter() noexcept
+		{
+			return internalData.first();
+		}
+
+		const Deleter& deleter() const noexcept
+		{
+			return internalData.first();
+		}
+
+		T& raw_pointer() noexcept
+		{
+			return internalData.second();
+		}
+
+		const T& raw_pointer() const noexcept
+		{
+			return internalData.second();
+		}
+
+	private:
+		compress_pair<Deleter, T> internalData;
+	};
+
+	template <class T, class Deleter = Yupei::default_delete<T>>
+	class unique_ptr : public unique_ptr_base<T,Deleter>
+	{
+	public:
+		using pointer = typename Internal::GetPtrForUniquePtr<T, Deleter>::type;
+		typedef T element_type;
+		typedef Deleter deleter_type;
+		using base_type = unique_ptr_base<T, Deleter>;
+		// 20.8.1.2.1, constructors
+		constexpr unique_ptr() noexcept
+			:base_type(pointer())
+		{
+
+		}
+		explicit unique_ptr(pointer p) noexcept
+			: base_type(p)
+		{
+
+		}
+
+		//if D is a ref(& or const &),just add &&
+		//else const & & &&
+		unique_ptr(pointer p,
+			Yupei::conditional_t <
+			is_reference<Deleter>{},
+			Deleter,
+			const Deletor& > d1) noexcept
+			:base_type(p,d1)
+		{
+
+		}
+		unique_ptr(pointer p, Yupei::add_rvalue_reference_t <
+			Yupei::remove_reference_t < Deleter >> d2) noexcept
+			: base_type(p,Yupei::move(d2))
+		{
+
+		}
+		unique_ptr(unique_ptr&& u) noexcept
+			: base_type(u.release(),Yupei::move(u.get_deleter()))
+		{
+
+		}
+
+		constexpr unique_ptr(nullptr_t) noexcept
+			: unique_ptr() { }
+
+		//Remarks: This constructor shall not participate in overload resolution unless:
+//(19.1) ！ unique_ptr<U, E>::pointer is implicitly convertible to pointer,
+//(19.2) ！ U is not an array type, and
+//(19.3) ！ either D is a reference type and E is the same type as D, or D is not a reference type and E is
+//implicitly convertible to D.
+		//now we start
+		template < class U,
+		class E,
+			typename = enable_if_t <
+			is_convertible<typename unique_ptr<U, E>::pointer, pointer>{}
+		&& !is_array<U>{}
+		&& conditional_t <
+			is_reference<D>{},
+			is_same<E, D>,
+			is_convertible<E, D>
+			>{} >
+		>
+			unique_ptr(unique_ptr<U, E>&& u) noexcept
+			:base_type(u.release(),Yupei::forward<E>(u.get_deleter()))
+		{
+
+		}
+		// 20.8.1.2.2, destructor
+		~unique_ptr()
+		{
+			this->deleter()(this->raw_pointer());
+		}
+		// 20.8.1.2.3, assignment
+		
+		unique_ptr& operator=(unique_ptr&& u) noexcept
+		{
+			this->get_deleter() = Yupei::forward<E>(u.get_deleter());
+			reset(u.release());
+		}
+		//(5.1) ！ unique_ptr<U, E>::pointer is implicitly convertible to pointer, and
+		//(5.2) ！ U is not an array type, and
+		//(5.3) ！ is_assignable<D&, E&&>::value is true.
+		template <class U, class E,
+		typename = enable_if_t<
+			is_convertible<typename unique_ptr<U,E>::pointer,pointer>::value 
+			&& !is_array<U>::value
+			&& is_assginable<D&,E&&>::value>>
+		unique_ptr& operator=(unique_ptr<U, E>&& u) noexcept
+		{
+			this->get_deleter() = Yupei::forward<E>(u.get_deleter());
+			reset(u.release());
+		}
+		unique_ptr& operator=(nullptr_t) noexcept
+		{
+			reset();
+		}
+		add_lvalue_reference_t<T> operator*() const
+		{
+			return *get();
+		}
+		pointer operator->() const noexcept
+		{
+			return get();
+		}
+		pointer get() const noexcept
+		{
+			return this->raw_pointer();
+		}
+		deleter_type& get_deleter() noexcept
+		{
+			return this->deleter();
+		}
+		const deleter_type& get_deleter() const noexcept
+		{
+			return this->deleter();
+		}
+		explicit operator bool() const noexcept
+		{
+			return get() != pointer{};
+		}
+		// 20.8.1.2.5 modifiers
+		pointer release() noexcept
+		{
+			auto old_p = this->get();
+			this->raw_pointer() = pointer{};
+			return old_p;
+		}
+		void reset(pointer p = pointer()) noexcept
+		{
+			auto old_p = this->raw_pointer();
+			this->raw_pointer() = p;
+			if (old_p != pointer{})
+			{
+				this->get_deleter()(old_p);
+			}
+		}
+		void swap(unique_ptr& u) noexcept
+		{
+			swap(this->raw_pointer(), u.raw_pointer());
+			swap(this->get_deleter(), u.get_deleter());
+		}
+		// disable copy from lvalue
+		unique_ptr(const unique_ptr&) = delete;
+		unique_ptr& operator=(const unique_ptr&) = delete;
+
+	};
+
 }
+

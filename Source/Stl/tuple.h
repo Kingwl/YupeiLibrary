@@ -422,7 +422,7 @@ namespace Yupei
 		is_convertible<U1&&,ThisType>::value && is_convertible<U2&&,Args...>::value>>
 		explicit constexpr tuple(pair<U1, U2>&& p) // only if sizeof...(Types) == 2
 			:this_value(Yupei::forward<pair<U1,U2>&&>(p).first),
-			base_type(Yupei::forward<pair<U1, U2>&&>(p).second)
+			base_type(Yupei::forward<pair<U1, U2>&&>(p).second_obj)
 		{
 
 		}
@@ -433,7 +433,7 @@ namespace Yupei
 			is_convertible<const U2&, Args...>::value >>
 			explicit constexpr tuple(const pair<U1, U2>& p) // only if sizeof...(Types) == 2
 			:this_value(p.first),
-			base_type(p.second)
+			base_type(p.second_obj)
 		{
 
 		}
@@ -597,7 +597,7 @@ namespace Yupei
 		tuple& operator=(const pair<U1,U2>& rhs)
 		{
 			this_value.Value = rhs.first;
-			(*((base_type*)this)).this_value.Value = rhs.second;
+			(*((base_type*)this)).this_value.Value = rhs.second_obj;
 			return *this;
 		}
 
@@ -607,7 +607,7 @@ namespace Yupei
 		tuple& operator=(pair<U1, U2>&& rhs)
 		{
 			this_value = Yupei::forward<pair<U1,U2>&&>(rhs).first;
-			(*((base_type*)this)).this_value.Value = Yupei::forward<pair<U1, U2>&&>(rhs).second;
+			(*((base_type*)this)).this_value.Value = Yupei::forward<pair<U1, U2>&&>(rhs).second_obj;
 			return *this;
 		}
 
@@ -934,7 +934,7 @@ namespace Yupei
 			index_sequence<Indexes1...>,
 			index_sequence<Indexes2...>)
 		:first(Yupei::get<Indexes1>(t1)...),
-		second(Yupei::get<Indexes2>(t2)...)
+		second_obj(Yupei::get<Indexes2>(t2)...)
 	{
 
 	}

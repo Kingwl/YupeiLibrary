@@ -73,6 +73,7 @@
     <ClInclude Include="Stl\basic.h" />
     <ClInclude Include="Stl\binary_search_tree.h" />
     <ClInclude Include="Stl\compare_funtor.h" />
+    <ClInclude Include="Stl\compress_pair.h" />
     <ClInclude Include="Stl\container_traits.h" />
     <ClInclude Include="Stl\functional.h" />
     <ClInclude Include="Stl\iterator.h" />

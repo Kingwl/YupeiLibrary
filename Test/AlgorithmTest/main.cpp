@@ -8,7 +8,7 @@ int main()
 	auto mv = Yupei::min(lst);
 	auto maxv = Yupei::max(lst);
 	constexpr auto x = Yupei::static_max(1, 3.0, 2, 1, 3, 2, 9, 5, 3);
-	std::cout << pr.first << " " << pr.second;
+	std::cout << pr.first << " " << pr.second_obj;
 	std::getchar();
 	return 0;
 }

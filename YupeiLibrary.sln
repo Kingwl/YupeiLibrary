@@ -32,6 +32,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MemoryResourceTest", "Test\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AlgorithmTest", "Test\AlgorithmTest\AlgorithmTest.vcxproj", "{E7E99B35-8E94-4331-8ED9-C4BEE7B16EAE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmartPointersTest", "Test\SmartPointersTest\SmartPointersTest.vcxproj", "{D9727847-9A12-4919-A389-AB1B7DF4BBD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -104,6 +106,14 @@ Global
 		{E7E99B35-8E94-4331-8ED9-C4BEE7B16EAE}.Release|Win32.Build.0 = Release|Win32
 		{E7E99B35-8E94-4331-8ED9-C4BEE7B16EAE}.Release|x64.ActiveCfg = Release|x64
 		{E7E99B35-8E94-4331-8ED9-C4BEE7B16EAE}.Release|x64.Build.0 = Release|x64
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Debug|Win32.Build.0 = Debug|Win32
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Debug|x64.ActiveCfg = Debug|x64
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Debug|x64.Build.0 = Debug|x64
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Release|Win32.ActiveCfg = Release|Win32
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Release|Win32.Build.0 = Release|Win32
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Release|x64.ActiveCfg = Release|x64
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -119,5 +129,6 @@ Global
 		{A104AFC2-4990-4D02-9555-589A95ED843A} = {0AC272A7-A5AC-4D00-86C9-4C6C0AE0F0B5}
 		{6CAA83F7-8FB8-4DC2-8D3E-FB46CCD081C0} = {0AC272A7-A5AC-4D00-86C9-4C6C0AE0F0B5}
 		{E7E99B35-8E94-4331-8ED9-C4BEE7B16EAE} = {0AC272A7-A5AC-4D00-86C9-4C6C0AE0F0B5}
+		{D9727847-9A12-4919-A389-AB1B7DF4BBD2} = {0AC272A7-A5AC-4D00-86C9-4C6C0AE0F0B5}
 	EndGlobalSection
 EndGlobal

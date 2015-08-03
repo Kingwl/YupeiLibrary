@@ -20,7 +20,7 @@ namespace Yupei
 	//otherwise it shall be derived from false_type.A program may specialize this template to 
 	//derive from true_type for a user - defined type T that does not have a nested allocator_type 
 	//but nonetheless can be constructed with an allocator where either :
-	//¡ªthe first argument of a constructor has type allocator_arg_t and the second argument has type Alloc or
+	//¡ªthe first argument of a constructor has type allocator_arg_t and the second_obj argument has type Alloc or
 //		¡ªthe last argument of a constructor has type Alloc.
 //
 

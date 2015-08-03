@@ -87,6 +87,9 @@
     <ClInclude Include="Stl\compare_funtor.h">
       <Filter>Stl\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Stl\compress_pair.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stl\memory_resource.cpp">

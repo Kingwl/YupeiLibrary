@@ -33,12 +33,12 @@ namespace Yupei
 		struct binary_args_traits : arguement_type_traits<Type> {};
 
 		template<typename Type>
-		struct binary_args_traits<Type, void_t<typename Type::first_argument_type,
+		struct binary_args_traits < Type, void_t<typename Type::first_argument_type,
 			typename Type::second_argument_type >>
 			:arguement_type_traits<Type>
 		{
 			using first_argument_type = typename Type::first_argument_type;
-		using second_argument_type = typename Type::second_argument_type;
+			using second_argument_type = typename Type::second_argument_type;
 		};
 
 		template<typename Type>
@@ -53,7 +53,7 @@ namespace Yupei
 				binary_args_traits<Type>
 				>> ;
 		};
-	};
+	}
 
 	//template <class T> class reference_wrapper {
 	//public:
@@ -86,7 +86,8 @@ namespace Yupei
 	result_type shall be a synonym for T::result_type;
 	(3.4) ¡ª otherwise result_type shall not be defined.*/
 
-	template <typename T> class reference_wrapper : public Internal::weak_types_traits<T>::type
+	template <typename T>
+	class reference_wrapper : public Internal::weak_types_traits<T>::type
 	{
 	public:
 		// types
@@ -110,8 +111,7 @@ namespace Yupei
 		}
 		// invocation
 		template <class... ArgTypes>
-		result_of_t<T&(ArgTypes&&...)>
-			operator() (ArgTypes&&...args) const
+		result_of_t<T&(ArgTypes&&...)> operator() (ArgTypes&&...args) const
 		{
 			return Yupei::invoke(get(), Yupei::forward<ArgTypes>(args)...);
 		}

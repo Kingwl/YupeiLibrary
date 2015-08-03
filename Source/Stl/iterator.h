@@ -599,7 +599,7 @@ namespace Yupei
 		 {
 			 return static_cast<reference>(*current);
 		 }
-		 pointer operator->() const
+		 Iterator operator->() const
 		 {
 			 return current;
 		 }

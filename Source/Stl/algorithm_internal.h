@@ -59,7 +59,7 @@ namespace Yupei
 			}
 			else
 			{
-				//second is smaller
+				//second_obj is smaller
 				if (comp(*nextIt, *res.first)) res.first = nextIt;
 				if (comp(*res.second, *first)) res.second = first;
 			}

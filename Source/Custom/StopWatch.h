@@ -12,7 +12,7 @@ namespace Yupei
 			startTime = std::chrono::high_resolution_clock::now();
 		}
 
-		//nano second
+		//nano second_obj
 		auto Stop()
 		{
 			auto endTime = std::chrono::high_resolution_clock::now();

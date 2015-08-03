@@ -138,7 +138,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 		typedef T1 first_type;
 		typedef T2 second_type;
 		T1 first;
-		T2 second;
+		T2 second_obj;
 		pair(const pair&) = default;
 		pair(pair&&) = default;
 		constexpr pair();
@@ -162,11 +162,11 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 		typedef T1 first_type;
 		typedef T2 second_type;
 		T1 first;
-		T2 second;
+		T2 second_obj;
 		pair(const pair&) = default;
 		pair(pair&&) = default;
 		constexpr pair()
-			:first{}, second{}
+			:first{}, second_obj{}
 		{
 
 		}
@@ -174,7 +174,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 			is_copy_constructible<first_type>::value 
 			&& is_copy_constructible<second_type>::value>>
 		constexpr pair(const T1& x, const T2& y)
-			:first(x),second(y)
+			:first(x),second_obj(y)
 		{
 
 		}
@@ -186,7 +186,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 			noexcept(is_nothrow_constructible<T1,U&&>::value&&
 				is_nothrow_constructible<T2, V&&>::value)
 			:first(Yupei::forward<U>(x)),
-			second(Yupei::forward<V>(y))
+			second_obj(Yupei::forward<V>(y))
 		{
 
 		}
@@ -195,7 +195,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 		is_convertible<const U&,first_type>::value &&
 		is_convertible<const V&, second_type>::value>>
 		constexpr pair(const pair<U, V>& p)
-			:first(p.first),second(p.second)
+			:first(p.first),second_obj(p.second_obj)
 		{
 
 		}
@@ -207,7 +207,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 			noexcept(is_nothrow_constructible<T1, U&&>::value&&
 				is_nothrow_constructible<T2, V&&>::value)
 			:first(Yupei::forward<U>(p.first)),
-			second(Yupei::forward<V>(p.second))
+			second_obj(Yupei::forward<V>(p.second_obj))
 		{
 
 		}
@@ -230,7 +230,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 			if (this != &p)
 			{
 				first = p.first;
-				second = p.second;
+				second_obj = p.second_obj;
 			}
 			return *this;
 		}
@@ -238,35 +238,35 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 		pair& operator=(pair<U,V>&& p) 
 		{
 			first = Yupei::forward<U>(p.first);
-			second = Yupei::forward<V>(p.second);
+			second_obj = Yupei::forward<V>(p.second_obj);
 			return *this;
 		}
 		pair& operator=(pair&& p)
 		{
 			first = Yupei::forward<T1>(p.first);
-			second = Yupei::forward<T2>(p.second);
+			second_obj = Yupei::forward<T2>(p.second_obj);
 			return *this;
 		}
 		
 		void swap(pair& p) noexcept(noexcept(swap(first, p.first)) &&
-			noexcept(swap(second, p.second)))
+			noexcept(swap(second_obj, p.second_obj)))
 		{
 			swap(first, p.first);
-			swap(second, p.second);
+			swap(second_obj, p.second_obj);
 		}
 	};
 
 	template <class T1, class T2>
 	constexpr bool operator==(const pair<T1, T2>& x, const pair<T1, T2>& y)
 	{
-		return x.first == y.first && x.second == y.second;
+		return x.first == y.first && x.second_obj == y.second_obj;
 	}
 	template <class T1, class T2>
 	constexpr bool operator<(const pair<T1, T2>& x, const pair<T1, T2>& y)
 	{
 		//if x.first < y.first,return true
-		//else if x.first == y.first and x.second < y.second,return true.
-		return x.first < y.first || (!(y.first < x.first) && x.second < y.second);
+		//else if x.first == y.first and x.second_obj < y.second_obj,return true.
+		return x.first < y.first || (!(y.first < x.first) && x.second_obj < y.second_obj);
 	}
 	
 	template <class T1, class T2>
@@ -400,7 +400,7 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 			template<typename PairType>
 			static constexpr decltype(auto) GetValue(PairType&& p)
 			{
-				return (Yupei::forward<PairType>(p).second);
+				return (Yupei::forward<PairType>(p).second_obj);
 			}
 		};
 	}
@@ -464,17 +464,17 @@ const T&, T&&> move_if_noexcept(T& x) noexcept;*/
 	template <class T, class U>
 	constexpr T& get(pair<U, T>& p) noexcept
 	{
-		return (int)p.second;
+		return (int)p.second_obj;
 	}
 	template <class T, class U>
 	constexpr const T& get(const pair<U, T>& p) noexcept
 	{
-		return p.second;
+		return p.second_obj;
 	}
 	template <class T, class U>
 	constexpr T&& get(pair<U, T>&& p) noexcept
 	{
-		return p.second;
+		return p.second_obj;
 	}
 
 	

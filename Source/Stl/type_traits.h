@@ -3,7 +3,6 @@
 #include "traits_internal.h"
 #include "utility_internal.h"
 #include "__is_mem_func_obj.h"
-#include "algorithm_internal.h"
 
 namespace Yupei
 {
@@ -401,6 +400,11 @@ namespace Yupei
 	template<typename Type>
 	using is_abstract = bool_constant<
 		__is_abstract(Type)
+	>;
+
+	template<typename Type>
+	using is_final = bool_constant<
+		__is_final(Type)
 	>;
 
 	// If is_-
@@ -946,7 +950,6 @@ namespace Yupei
 	template<typename... Type>
 	using common_type_t = typename common_type<Type...>::type;
 
-#if  _MSC_FULL_VER > 190022816 //there is still bug with constexpr with RC
 	//no extended constexpr support
 	//static_max: fuck Visual C++ 2015 RC !
 	template<typename Type>
@@ -987,9 +990,6 @@ namespace Yupei
 
 	template <std::size_t Len, typename... Types>
 	using aligned_union_t = typename aligned_union<Len, Types...>::type;
-#endif
-
-	
 
 	template<typename Type>
 	struct underlying_type
