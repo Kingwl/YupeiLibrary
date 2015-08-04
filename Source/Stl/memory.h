@@ -272,11 +272,7 @@ namespace Yupei
 
 	namespace Internal
 	{
-		struct WrapInt
-		{
-			constexpr WrapInt(int) {}
-		};
-
+		
 		template<typename Alloc,
 			typename SizeType,
 			typename HintType>
@@ -578,7 +574,7 @@ namespace Yupei
 
 		template<typename UType,
 			typename = enable_if_t <
-			is_convertible<Type*, UType*>{} >>
+			is_convertible<Type*, UType*>::value >>
 			default_delete(const default_delete<UType>&) noexcept = default;
 
 		void operator()(Type* ptr) const noexcept
@@ -599,7 +595,7 @@ namespace Yupei
 
 		template<typename UType,
 			typename = enable_if_t <
-			is_convertible<Type(*)[], UType(*)[]>{} >>
+			is_convertible<Type(*)[], UType(*)[]>::value >>
 			void operator()(UType* ptr)
 		{
 			delete[] ptr;
@@ -653,6 +649,7 @@ namespace Yupei
 	struct unique_ptr_base
 	{
 	public:
+		using pointer = typename Internal::GetPtrForUniquePtr<T, Deleter>::type;
 		template<typename U>
 		unique_ptr_base(U&& u)
 			:internalData(Yupei::compress_value_initialize_first_arg,
@@ -680,28 +677,31 @@ namespace Yupei
 			return internalData.first();
 		}
 
-		T& raw_pointer() noexcept
+		pointer& raw_pointer() noexcept
 		{
 			return internalData.second();
 		}
 
-		const T& raw_pointer() const noexcept
+		const pointer& raw_pointer() const noexcept
 		{
 			return internalData.second();
 		}
 
 	private:
-		compress_pair<Deleter, T> internalData;
+		compress_pair<Deleter, pointer> internalData;
 	};
 
-	template <class T, class Deleter = Yupei::default_delete<T>>
-	class unique_ptr : public unique_ptr_base<T,Deleter>
+	template <class T, 
+	class Deleter = Yupei::default_delete<T>>
+	class unique_ptr : 
+		public unique_ptr_base<T,Deleter>
 	{
 	public:
-		using pointer = typename Internal::GetPtrForUniquePtr<T, Deleter>::type;
+		
 		typedef T element_type;
 		typedef Deleter deleter_type;
 		using base_type = unique_ptr_base<T, Deleter>;
+		using pointer =typename base_type::pointer;
 		// 20.8.1.2.1, constructors
 		constexpr unique_ptr() noexcept
 			:base_type(pointer())
@@ -716,29 +716,37 @@ namespace Yupei
 
 		//if D is a ref(& or const &),just add &&
 		//else const & & &&
+
+		using _lref_type_for_unique_ptr = conditional_t
+			<
+			is_reference<deleter_type>::value,
+			deleter_type,
+			const deleter_type&
+			>;
 		unique_ptr(pointer p,
-			Yupei::conditional_t <
-			is_reference<Deleter>{},
-			Deleter,
-			const Deletor& > d1) noexcept
+			_lref_type_for_unique_ptr d1) noexcept
 			:base_type(p,d1)
 		{
 
 		}
 		unique_ptr(pointer p, Yupei::add_rvalue_reference_t <
-			Yupei::remove_reference_t < Deleter >> d2) noexcept
-			: base_type(p,Yupei::move(d2))
+			Yupei::remove_reference_t<Deleter>> d2) noexcept
+			: base_type(p, 
+				Yupei::forward<Deleter>(u.get_deleter()))
 		{
 
 		}
 		unique_ptr(unique_ptr&& u) noexcept
-			: base_type(u.release(),Yupei::move(u.get_deleter()))
+			: base_type(u.release(),
+				Yupei::forward<Deleter>(u.get_deleter()))
 		{
 
 		}
 
 		constexpr unique_ptr(nullptr_t) noexcept
-			: unique_ptr() { }
+			: unique_ptr() 
+		{ 
+		}
 
 		//Remarks: This constructor shall not participate in overload resolution unless:
 //(19.1) ！ unique_ptr<U, E>::pointer is implicitly convertible to pointer,
@@ -749,13 +757,13 @@ namespace Yupei
 		template < class U,
 		class E,
 			typename = enable_if_t <
-			is_convertible<typename unique_ptr<U, E>::pointer, pointer>{}
-		&& !is_array<U>{}
+			is_convertible<typename unique_ptr<U, E>::pointer, pointer>::value
+		&& !is_array<U>::value
 		&& conditional_t <
-			is_reference<D>{},
+			is_reference<D>::value,
 			is_same<E, D>,
 			is_convertible<E, D>
-			>{} >
+			>::value >
 		>
 			unique_ptr(unique_ptr<U, E>&& u) noexcept
 			:base_type(u.release(),Yupei::forward<E>(u.get_deleter()))
@@ -765,27 +773,44 @@ namespace Yupei
 		// 20.8.1.2.2, destructor
 		~unique_ptr()
 		{
-			this->deleter()(this->raw_pointer());
+			if (get() != pointer{})
+				this->deleter()(this->get());
 		}
 		// 20.8.1.2.3, assignment
 		
 		unique_ptr& operator=(unique_ptr&& u) noexcept
 		{
-			this->get_deleter() = Yupei::forward<E>(u.get_deleter());
-			reset(u.release());
+			if (this != &u)
+			{
+				this->get_deleter() = Yupei::forward<E>(u.get_deleter());
+				reset(u.release());
+			}
+			return *this;
 		}
 		//(5.1) ！ unique_ptr<U, E>::pointer is implicitly convertible to pointer, and
 		//(5.2) ！ U is not an array type, and
 		//(5.3) ！ is_assignable<D&, E&&>::value is true.
 		template <class U, class E,
-		typename = enable_if_t<
-			is_convertible<typename unique_ptr<U,E>::pointer,pointer>::value 
+		typename = 
+			enable_if_t
+			<
+				is_convertible<
+								typename unique_ptr<U,E>::pointer,
+								pointer
+							>::value 
 			&& !is_array<U>::value
-			&& is_assginable<D&,E&&>::value>>
+			&& is_assignable
+				<
+					deleter_type&,
+					E&&
+				>::value
+			>
+		>
 		unique_ptr& operator=(unique_ptr<U, E>&& u) noexcept
 		{
 			this->get_deleter() = Yupei::forward<E>(u.get_deleter());
 			reset(u.release());
+			return *this;
 		}
 		unique_ptr& operator=(nullptr_t) noexcept
 		{
@@ -822,7 +847,7 @@ namespace Yupei
 			this->raw_pointer() = pointer{};
 			return old_p;
 		}
-		void reset(pointer p = pointer()) noexcept
+		void reset(pointer p = pointer{}) noexcept
 		{
 			auto old_p = this->raw_pointer();
 			this->raw_pointer() = p;
@@ -842,5 +867,250 @@ namespace Yupei
 
 	};
 
+	template <class T,
+	class Deleter>
+	class unique_ptr<T[],Deleter> :
+		public unique_ptr_base<T, Deleter>
+	{
+	public:
+
+		typedef T element_type;
+		typedef Deleter deleter_type;
+		using base_type = unique_ptr_base<T, Deleter>;
+		using pointer = typename base_type::pointer;
+		// 20.8.1.3.1, constructors
+		constexpr unique_ptr() noexcept
+			:base_type(pointer())
+		{
+
+		}
+		template<typename U>
+		using _can_be_contructed = 
+			enable_if_t
+			<
+				is_same<U, pointer>::value
+				|| (
+					is_same<element_type*, pointer>::value
+					&& is_convertible
+						<
+							typename Yupei::pointer_traits<U>::element_type(*)[],
+							typename element_type(*)[]
+						>::value
+					)
+			>;
+		template <class U,
+		typename = _can_be_contructed<U>>
+		explicit unique_ptr(U p) noexcept
+			:base_type(p)
+		{
+
+		}
+		
+
+		//if D is a ref(& or const &),just add &&
+		//else const & & &&
+
+		using _lref_type_for_unique_ptr = 
+			conditional_t
+			<
+				is_reference<deleter_type>::value,
+				deleter_type,
+				const deleter_type&
+			>;
+		template <class U,
+			typename = _can_be_contructed<U>>
+		unique_ptr(U p, _lref_type_for_unique_ptr d) noexcept
+		{
+
+		}
+		template <class U,
+			typename = _can_be_contructed<U>>
+		unique_ptr(U p, add_rvalue_reference_t <
+			remove_reference_t<Deleter>> d2) noexcept
+			: base_type(p,
+				Yupei::forward<Deleter>(u.get_deleter()))
+		{
+
+		}
+		unique_ptr(unique_ptr&& u) noexcept
+			: base_type(u.release(),
+				Yupei::forward<Deleter>(u.get_deleter()))
+		{
+
+		}
+
+		constexpr unique_ptr(nullptr_t) noexcept
+			: unique_ptr()
+		{
+		}
+
+		//(2.1) ！ U is an array type, and
+		//(2.2) ！ pointer is the same type as element_type*, and
+		//(2.3) ！ UP::pointer is the same type as UP::element_type*, and
+		//(2.4) ！ UP::element_type(*)[] is convertible to element_type(*)[], and
+		//(2.5) ！ either D is a reference type and E is the same type as D, or D is not a reference type and E is
+		//implicitly convertible to D.
+		//now we start
+		template <class U,class E>
+		using _temp_copy_type = bool_constant
+			<
+				is_array<U>::value
+				&&	is_same
+				<
+					pointer,
+					element_type*
+				>::value
+			&&	is_same
+				<
+					typename unique_ptr<U, E>::pointer,
+					typename unique_ptr<U, E>::element_type*
+				>::value
+			&& is_convertible
+				<
+					typename unique_ptr<U, E>::element_type(*)[],
+					element_type(*)[]
+				>::value
+			>;
+			template
+			<
+				typename U,
+				typename E,
+				typename = enable_if_t
+				<
+					_temp_copy_type<U,E>::value
+					&&	conditional_t
+						<
+							is_reference<D>::value,
+							is_same<D, E>,
+							is_convertible<E, D>
+						>::value
+				>
+			>
+			unique_ptr(unique_ptr<U, E>&& u) noexcept
+			:base_type(u.release(), 
+				Yupei::forward<E>(u.get_deleter()))
+		{
+
+		}
+		// 20.8.1.2.2, destructor
+		~unique_ptr()
+		{
+			if (get() != pointer{})
+				this->deleter()(this->get());
+		}
+		// 20.8.1.2.3, assignment
+
+		unique_ptr& operator=(unique_ptr&& u) noexcept
+		{
+			this->get_deleter() = Yupei::forward<E>(u.get_deleter());
+			reset(u.release());
+		}
+		//(5.1) ！ unique_ptr<U, E>::pointer is implicitly convertible to pointer, and
+		//(5.2) ！ U is not an array type, and
+		//(5.3) ！ is_assignable<D&, E&&>::value is true.
+		template
+		<
+			typename U,
+			typename E,
+			typename = enable_if_t
+						<
+							_temp_copy_type<U, E>::value
+							&&	is_assginable<Deleter&,E&&>::value
+						>
+		>
+		unique_ptr& operator=(unique_ptr<U, E>&& u) noexcept
+		{
+			this->get_deleter() = Yupei::forward<E>(u.get_deleter());
+			reset(u.release());
+		}
+		unique_ptr& operator=(nullptr_t) noexcept
+		{
+			reset(pointer{});
+		}
+		pointer get() const noexcept
+		{
+			return this->raw_pointer();
+		}
+		deleter_type& get_deleter() noexcept
+		{
+			return this->deleter();
+		}
+		const deleter_type& get_deleter() const noexcept
+		{
+			return this->deleter();
+		}
+		explicit operator bool() const noexcept
+		{
+			return get() != pointer{};
+		}
+		// 20.8.1.2.5 modifiers
+		pointer release() noexcept
+		{
+			auto old_p = this->get();
+			this->raw_pointer() = pointer{};
+			return old_p;
+		}
+		template 
+			<
+				class U,
+				typename = _can_be_contructed<U>
+			> 
+		void reset(U p) noexcept
+		{
+			auto old_p = this->raw_pointer();
+			this->raw_pointer() = p;
+			if (old_p != pointer{})
+			{
+				this->get_deleter()(old_p);
+			}
+		}
+		void reset(std::nullptr_t = nullptr)
+		{
+			reset(pointer{});
+		}
+		T& operator[](size_t i) const
+		{
+			return get()[i];
+		}
+		void swap(unique_ptr& u) noexcept
+		{
+			swap(this->raw_pointer(), u.raw_pointer());
+			swap(this->get_deleter(), u.get_deleter());
+		}
+		// disable copy from lvalue
+		unique_ptr(const unique_ptr&) = delete;
+		unique_ptr& operator=(const unique_ptr&) = delete;
+
+	};
+
+	namespace Internal
+	{
+		template<typename T>
+		struct is_incomplete_array_type : false_type {};
+
+		template<typename T>
+		struct is_incomplete_array_type<T[]> : true_type {};
+	}
+
+	template<typename T,
+		typename... Args,
+	typename = enable_if_t<!is_array<T>::value>>
+		unique_ptr<T> make_unique(Args&&... args)
+	{
+		return unique_ptr<T>(new T(Yupei::forward<Args>(args)...));
+	}
+
+	template<typename T,
+		typename... Args,
+		typename = enable_if_t<Internal::is_incomplete_array_type<T>::value >>
+		unique_ptr<T> make_unique(std::size_t n)
+	{
+		return unique_ptr<T>(new remove_extent_t<T>[n]());
+	}
+
+	template <class T, 
+	class... Args,
+		typename = enable_if_t<is_array<T>::value && sizeof(T) != 0 >>
+		T make_unique(Args&&...) = delete;
 }
 

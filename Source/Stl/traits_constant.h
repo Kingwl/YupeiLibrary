@@ -26,4 +26,13 @@ namespace Yupei
 
 	using true_type = bool_constant<true>;
 	using false_type = bool_constant<false>;
+
+	namespace Internal
+	{
+		struct WrapInt
+		{
+			constexpr WrapInt(int) {}
+		};
+
+	}
 }

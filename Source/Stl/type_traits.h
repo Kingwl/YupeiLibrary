@@ -477,24 +477,38 @@ namespace Yupei
 
 	namespace Internal
 	{
-		template<typename T, typename U, typename = void>
+		/*template<typename T, typename U, typename = void>
 		struct IsAssignableHelper : false_type
 		{
 
 		};
 
 		template<typename T, typename U>
-		struct IsAssignableHelper<T, U, void_t<decltype(declval<T>() = declval<U>())>> : true_type
+		struct IsAssignableHelper<T, U, void_t<
+			decltype(Yupei::declval<T>() = Yupei::declval<U>())>> : true_type
 		{
 
+		};*/
+
+		template<typename T,typename U>
+		struct IsAssignableHelper
+		{
+			template<typename T1,typename U1>
+			static false_type _Foo(WrapInt);
+			template<typename T1, typename U1>
+			static auto _Foo(int)->
+				decltype(
+					(void)(Yupei::declval<T1>() = Yupei::declval<U1>()), true_type{});
+			using type = decltype(_Foo<T,U>(0));
 		};
 	}
 
 	template<typename T, typename U>
-	struct is_assignable : Internal::IsAssignableHelper<T, U>
+	struct is_assignable : Internal::IsAssignableHelper<T, U>::type
 	{
 
 	};
+
 
 	template<typename Type>
 	using is_copy_assignable = is_assignable<
@@ -1178,7 +1192,7 @@ namespace Yupei
 	>
 	{
 		using type =
-			decltype(invoke(declval<F>(), declval<Args>()...));
+			decltype(Yupei::invoke(declval<F>(), declval<Args>()...));
 	};
 
 	template <typename Type>

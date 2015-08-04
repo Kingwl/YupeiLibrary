@@ -107,13 +107,14 @@ namespace Yupei
 		}
 
 		template<
-			typename... Args,
+			typename T,
 			typename... UArgs
 		>
-			compress_pair(Args&&... args,
+			compress_pair(
 				compress_value_initialize_both_args_t hint,
+				T&& t1,
 				UArgs&&... uargs)
-			:first_obj(Yupei::forward<Args>(args)...),
+			:first_obj(Yupei::forward<T>(t1)),
 			second_obj(Yupei::forward<UArgs>(uargs)...)
 		{
 
