@@ -1,8 +1,10 @@
 #pragma once
 
 #include "utility_internal.h"
+#include "__swap.h"
 #include "__allocator.h"
 #include "compress_pair.h"
+#include "compare_funtor.h"
 #include "iterator.h"
 #include <numeric>
 #include <cinttypes>
@@ -858,8 +860,8 @@ namespace Yupei
 		}
 		void swap(unique_ptr& u) noexcept
 		{
-			swap(this->raw_pointer(), u.raw_pointer());
-			swap(this->get_deleter(), u.get_deleter());
+			Yupei::swap(this->raw_pointer(), u.raw_pointer());
+			Yupei::swap(this->get_deleter(), u.get_deleter());
 		}
 		// disable copy from lvalue
 		unique_ptr(const unique_ptr&) = delete;
@@ -1112,5 +1114,104 @@ namespace Yupei
 	class... Args,
 		typename = enable_if_t<is_array<T>::value && sizeof(T) != 0 >>
 		T make_unique(Args&&...) = delete;
+
+	template<class T, class D> 
+	void swap(unique_ptr<T, D>& x, unique_ptr<T, D>& y) noexcept
+	{
+		x.swap(y);
+	}
+	template<class T1, class D1, class T2, class D2>
+	bool operator==(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y)
+	{
+		return x.get() == y.get();
+	}
+	template<class T1, class D1, class T2, class D2>
+	bool operator!=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y)
+	{
+		return x.get() != y.get();
+	}
+	template<class T1, class D1, class T2, class D2>
+	bool operator<(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y)
+	{
+		return less < common_type_t<
+			typename unique_ptr<T1, D1>::pointer,
+			typename unique_ptr<T2, D2>::pointer
+			>> {}(x, y);
+	}
+	template<class T1, class D1, class T2, class D2>
+	bool operator<=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y)
+	{
+		return !(y < x);
+	}
+	template<class T1, class D1, class T2, class D2>
+	bool operator>(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y)
+	{
+		return y < x;
+	}
+	template<class T1, class D1, class T2, class D2>
+	bool operator>=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y)
+	{
+		return !(x < y);
+	}
+	template <class T, class D>
+	bool operator==(const unique_ptr<T, D>& x, std::nullptr_t) noexcept
+	{
+		return !x;
+	}
+	template <class T, class D>
+	bool operator==(std::nullptr_t, const unique_ptr<T, D>& y) noexcept
+	{
+		return !y;
+	}
+	template <class T, class D>
+	bool operator!=(const unique_ptr<T, D>& x, std::nullptr_t) noexcept
+	{
+		return static_cast<bool>(x);
+	}
+	template <class T, class D>
+	bool operator!=(std::nullptr_t, const unique_ptr<T, D>& y) noexcept
+	{
+		return static_cast<bool>(y);
+	}
+	template <class T, class D>
+	bool operator<(const unique_ptr<T, D>& x, std::nullptr_t)
+	{
+		return less<typename unique_ptr<T, D>::pointer>{}(x.get(), nullptr);
+	}
+	template <class T, class D>
+	bool operator<(std::nullptr_t, const unique_ptr<T, D>& y)
+	{
+		return less<typename unique_ptr<T, D>::pointer>{}(nullptr,y.get());
+	}
+	template <class T, class D>
+	bool operator<=(const unique_ptr<T, D>& x, std::nullptr_t)
+	{
+		return !(nullptr < x);
+	}
+	template <class T, class D>
+	bool operator<=(std::nullptr_t, const unique_ptr<T, D>& y)
+	{
+		return !(y < nullptr);
+	}
+	template <class T, class D>
+	bool operator>(const unique_ptr<T, D>& x, std::nullptr_t)
+	{
+		return nullptr < x;
+	}
+	template <class T, class D>
+	bool operator>(std::nullptr_t, const unique_ptr<T, D>& y)
+	{
+		return y < nullptr;
+	}
+	template <class T, class D>
+	bool operator>=(const unique_ptr<T, D>& x, std::nullptr_t)
+	{
+		return !(x < nullptr);
+	}
+	template <class T, class D>
+	bool operator>=(std::nullptr_t, const unique_ptr<T, D>& y)
+	{
+		return !(nullptr < y);
+	}
 }
 

@@ -96,7 +96,7 @@ int main()
 		int i = 0;
 		Yupei::unique_ptr<int, do_nothing> p1(&i);
 		Yupei::unique_ptr<int> p2;
-
+		p1 != p2;
 		// This mistakenly compiles:(Yupei's is OK!!!!!)
 		//static_assert(Yupei::is_assignable<decltype(p2), decltype(p1)>::value, "hahah");
 
@@ -112,12 +112,14 @@ int main()
 		std::cout << "db = " << db << '\n';
 		std::cout << "dd = " << dd << '\n';
 		{
+			using Yupei::swap;
 			Ptr<derived> pd(new derived, dd);
 			pd.reset(new derived);
 			Ptr<base> pb(nullptr, db);
 			pb = Yupei::move(pd);  // The converting move assignment!
 			std::cout << "pb.get_deleter() = " << pb.get_deleter() << '\n';
 			std::cout << "pd.get_deleter() = " << pd.get_deleter() << '\n';
+			swap(pd, pd);
 		}
 		std::cout << "db = " << db << '\n';
 		std::cout << "dd = " << dd << '\n';
