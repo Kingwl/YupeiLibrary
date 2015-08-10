@@ -1,6 +1,7 @@
 #pragma once
 
 #include "type_traits.h"
+#include "utility_internal.h"
 
 #pragma warning(push)
 
@@ -28,15 +29,16 @@ namespace Yupei
 		typename T1,
 		typename T2
 	>
-	struct compress_pair<T1, T2, true> :private T1
+	struct compress_pair<T1, T2, true> final:
+		private T1
 	{
 		T2 second_obj;
 
 		template<typename... Args>
-		compress_pair(compress_value_initialize_first_arg_t,
+		explicit compress_pair(compress_value_initialize_first_arg_t,
 			Args&&... args)
-			:T1(),
-			second_obj(Yupei::forward<Args>(args)...)
+			:T1{},
+			second_obj{ Yupei::forward<Args>(args)... }
 		{
 
 		}
@@ -55,7 +57,7 @@ namespace Yupei
 
 		}
 
-		compress_pair()
+		constexpr compress_pair()
 			:T1(),
 			second_obj()
 		{
@@ -98,7 +100,7 @@ namespace Yupei
 		T2 second_obj;
 		T1 first_obj;
 		template<typename... Args>
-		compress_pair(compress_value_initialize_first_arg_t,
+		constexpr compress_pair(compress_value_initialize_first_arg_t,
 			Args&&... args)
 			:first_obj(),
 			second_obj(Yupei::forward<Args>(args)...)
@@ -120,7 +122,7 @@ namespace Yupei
 
 		}
 
-		compress_pair()
+		constexpr compress_pair()
 			:first_obj(),
 			second_obj()
 		{

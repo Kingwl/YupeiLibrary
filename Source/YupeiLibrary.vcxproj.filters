@@ -13,6 +13,9 @@
     <Filter Include="Custom">
       <UniqueIdentifier>{0afc5423-d5c4-4343-9238-797cdaae876a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Stl\SmartPointers">
+      <UniqueIdentifier>{02fb1ea8-e19c-4881-b3eb-a25f7f51a763}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stl\__allocator.h">
@@ -88,6 +91,18 @@
       <Filter>Stl\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Stl\compress_pair.h">
+      <Filter>Stl\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\SmartPointers\default_delete.h">
+      <Filter>Stl\SmartPointers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\SmartPointers\unique_ptr.h">
+      <Filter>Stl\SmartPointers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\SmartPointers\shared_ptr.h">
+      <Filter>Stl\SmartPointers</Filter>
+    </ClInclude>
+    <ClInclude Include="Stl\pointer_traits.h">
       <Filter>Stl\Headers</Filter>
     </ClInclude>
   </ItemGroup>

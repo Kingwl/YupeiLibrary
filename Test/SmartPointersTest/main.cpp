@@ -125,6 +125,9 @@ int main()
 		std::cout << "dd = " << dd << '\n';
 
 	}
+	{
+		Yupei::unsynchronized_shared_ptr<int> sp{ new int() };
+	}
 	getchar();
 	_CrtDumpMemoryLeaks();
 	return 0;

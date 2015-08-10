@@ -80,6 +80,10 @@
     <ClInclude Include="Stl\math.h" />
     <ClInclude Include="Stl\memory.h" />
     <ClInclude Include="Stl\memory_resource.h" />
+    <ClInclude Include="Stl\pointer_traits.h" />
+    <ClInclude Include="Stl\SmartPointers\default_delete.h" />
+    <ClInclude Include="Stl\SmartPointers\shared_ptr.h" />
+    <ClInclude Include="Stl\SmartPointers\unique_ptr.h" />
     <ClInclude Include="Stl\traits_constant.h" />
     <ClInclude Include="Stl\traits_internal.h" />
     <ClInclude Include="Stl\tuple.h" />
